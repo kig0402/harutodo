@@ -1,5 +1,8 @@
-const CACHE = 'haru-mobile-v13';
-const CORE = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg', '/icon-192.png', '/icon-512.png'];
+const CACHE = 'haru-mobile-v14';
+const APP_ROOT = new URL('./', self.registration.scope);
+const CORE = ['', 'index.html', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png']
+  .map(path => new URL(path, APP_ROOT).href);
+const APP_INDEX = new URL('index.html', APP_ROOT).href;
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
 });
@@ -14,5 +17,5 @@ self.addEventListener('fetch', event => {
       caches.open(CACHE).then(cache => cache.put(event.request, copy));
     }
     return response;
-  }).catch(() => caches.match('/index.html'))));
+  }).catch(() => caches.match(APP_INDEX))));
 });
