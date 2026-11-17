@@ -1,0 +1,2 @@
+[functions.google-tasks-oauth]
+verify_jwt = false
