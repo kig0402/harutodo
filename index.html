@@ -58,7 +58,7 @@ body[data-view="calendar"] .layout{height:100dvh;max-height:100dvh;overflow:hidd
 .task-drag-ghost{position:fixed;pointer-events:none;z-index:10000;background:#ffffff;border:2px solid var(--green);box-shadow:0 14px 32px rgba(0,0,0,.22);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:650;color:var(--ink);max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transform:translate(-50%,-70%) rotate(2.5deg) scale(1.05)}
 .ghost-target-date{font-size:11px;color:var(--green);margin-top:2px;font-weight:600}
 .cell.drag-over{background:var(--soft)!important;outline:2px dashed var(--green)!important;outline-offset:-2px;border-radius:6px;transform:scale(1.06);transition:transform .12s ease,background-color .12s ease;z-index:25}
-.day-popover.dragging-out{opacity:.18!important;pointer-events:none!important;transition:opacity .18s ease}
+.day-popover.dragging-out, .day-popover.dragging-out *{opacity:.16!important;pointer-events:none!important;transition:opacity .18s ease}
 .day-popover-back.dragging-out{pointer-events:none!important}
 </style>
 </head>
@@ -161,7 +161,7 @@ try{render();setInterval(reminders,15000);reminders()}catch(error){document.getE
 setInterval(pollCloud,15000);window.addEventListener('focus',()=>{if(!isUserTyping()){pollCloud();if(googleAccessToken)syncGoogleTasks(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isUserTyping()){pollCloud();if(googleAccessToken)syncGoogleTasks(false)}});initCloud();
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v36')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v37')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
