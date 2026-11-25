@@ -763,7 +763,7 @@ function attachTaskDragEvents(task,onMovedCallback){
     if(target.closest('.check')||target.closest('.delete'))return;
 
     const startX=touch.clientX,startY=touch.clientY;
-    let isDragging=false,ghost=null,lastClientX=startX,lastClientY=startY;
+    let isDragging=false,hasMovedEnough=false,ghost=null,lastClientX=startX,lastClientY=startY;
     const popover=document.querySelector('.day-popover');
     const popoverBack=document.querySelector('.day-popover-back');
 
@@ -781,23 +781,24 @@ function attachTaskDragEvents(task,onMovedCallback){
       document.body.appendChild(ghost);
       ghost.style.left=startX+'px';
       ghost.style.top=startY+'px';
-    },380);
+    },420);
 
     function onTouchMove(ev){
       const t=ev.touches[0];
       lastClientX=t.clientX;lastClientY=t.clientY;
       const dx=t.clientX-startX,dy=t.clientY-startY;
       if(!isDragging){
-        if(Math.abs(dx)>8||Math.abs(dy)>8)clearTimeout(holdTimer);
+        if(Math.abs(dx)>10||Math.abs(dy)>10)clearTimeout(holdTimer);
         return;
       }
       if(ev.cancelable)ev.preventDefault();
+      if(Math.hypot(dx,dy)>=18)hasMovedEnough=true;
       if(ghost){
         ghost.style.left=t.clientX+'px';
         ghost.style.top=t.clientY+'px';
         ghost.style.display='none';
       }
-      const elUnder=document.elementFromPoint(t.clientX,t.clientY);
+      const elUnder=hasMovedEnough?document.elementFromPoint(t.clientX,t.clientY):null;
       if(ghost)ghost.style.display='';
 
       const targetCell=elUnder?elUnder.closest('.cell[data-day]'):null;
@@ -805,14 +806,16 @@ function attachTaskDragEvents(task,onMovedCallback){
       const targetTimeSec=elUnder?elUnder.closest('.time-dropzone[data-section]'):null;
 
       document.querySelectorAll('.cell[data-day], .next-date-group, .time-dropzone').forEach(el=>{
-        if(el===targetCell||el===targetGroup||el===targetTimeSec)el.classList.add('drag-over');
+        if(hasMovedEnough&&(el===targetCell||el===targetGroup||el===targetTimeSec))el.classList.add('drag-over');
         else el.classList.remove('drag-over');
       });
 
       if(ghost){
         const hintEl=ghost.querySelector('.ghost-target-date');
         if(hintEl){
-          if(targetCell&&targetCell.dataset.day){
+          if(!hasMovedEnough){
+            hintEl.textContent='원하는 날짜로 천천히 이동하세요';
+          }else if(targetCell&&targetCell.dataset.day){
             hintEl.textContent='→ '+fmt(new Date(targetCell.dataset.day+'T00:00:00'),{month:'numeric',day:'numeric',weekday:'short'})+' 이동';
           }else if(targetGroup){
             const gDate=targetGroup.dataset.groupDate;
@@ -827,26 +830,34 @@ function attachTaskDragEvents(task,onMovedCallback){
       }
     }
 
-    function onTouchEnd(){
+    function cleanupTouchDrag(){
       clearTimeout(holdTimer);
       window.removeEventListener('touchmove',onTouchMove);
       window.removeEventListener('touchend',onTouchEnd);
-      window.removeEventListener('touchcancel',onTouchEnd);
-
-      if(ghost){ghost.style.display='none';}
-      const elUnder=document.elementFromPoint(lastClientX,lastClientY);
+      window.removeEventListener('touchcancel',onTouchCancel);
       if(ghost){ghost.remove();ghost=null;}
-
       task.classList.remove('task-touch-dragging');
       if(popover)popover.classList.remove('dragging-out');
       if(popoverBack)popoverBack.classList.remove('dragging-out');
+      document.querySelectorAll('.cell[data-day], .next-date-group, .time-dropzone').forEach(el=>el.classList.remove('drag-over'));
+    }
 
-      if(isDragging){
+    function onTouchCancel(){
+      cleanupTouchDrag();
+    }
+
+    function onTouchEnd(){
+      const moved=hasMovedEnough;
+      const dragging=isDragging;
+      if(ghost){ghost.style.display='none';}
+      const elUnder=(dragging&&moved)?document.elementFromPoint(lastClientX,lastClientY):null;
+      cleanupTouchDrag();
+
+      if(dragging&&moved){
         suppressClickUntil=Date.now()+600;
         const targetCell=elUnder?elUnder.closest('.cell[data-day]'):null;
         const targetGroup=elUnder?elUnder.closest('.next-date-group'):null;
         const targetTimeSec=elUnder?elUnder.closest('.time-dropzone[data-section]'):null;
-        document.querySelectorAll('.cell[data-day], .next-date-group, .time-dropzone').forEach(el=>el.classList.remove('drag-over'));
 
         if(targetCell&&targetCell.dataset.day){
           const targetDate=targetCell.dataset.day;
@@ -863,7 +874,7 @@ function attachTaskDragEvents(task,onMovedCallback){
 
     window.addEventListener('touchmove',onTouchMove,{passive:false});
     window.addEventListener('touchend',onTouchEnd);
-    window.addEventListener('touchcancel',onTouchEnd);
+    window.addEventListener('touchcancel',onTouchCancel);
   },{passive:false});
 }
 
@@ -1262,7 +1273,7 @@ function setupPullToRefresh(){
 setInterval(pollCloud,5000);window.addEventListener('focus',()=>{if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});initCloud();setupPullToRefresh();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v56')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v57')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
