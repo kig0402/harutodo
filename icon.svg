@@ -1,4 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="128" fill="#456b54"/>
-  <path d="m130 263 82 82 174-180" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="38"/>
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#eaeef5"/>
+    </linearGradient>
+    <linearGradient id="boxGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4593ff"/>
+      <stop offset="100%" stop-color="#1f6feb"/>
+    </linearGradient>
+    <filter id="boxShadow" x="-15%" y="-15%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#1f6feb" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="url(#bgGrad)"/>
+  <rect x="108" y="108" width="296" height="296" rx="74" fill="url(#boxGrad)" filter="url(#boxShadow)"/>
+  <path d="M174 262 L228 316 L342 198" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="34"/>
 </svg>
