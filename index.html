@@ -129,6 +129,59 @@ body.is-task-dragging,body.is-task-dragging *{user-select:none!important;-webkit
 .calendar{touch-action:pan-y}
 .cal-track.cal-animating{pointer-events:none}
 
+/* Task Swipe Actions, Notes, Tags, Subtasks & Quick Find */
+.task-swipe-wrap{position:relative;overflow:hidden;border-radius:11px;background:#f7f8fa}
+.task-swipe-bg{position:absolute;inset:0;display:flex;align-items:stretch;justify-content:space-between;border-radius:11px;overflow:hidden;pointer-events:none}
+.task-swipe-wrap.swipe-open .task-swipe-bg{pointer-events:auto}
+.task-swipe-complete-bg{flex:1;background:#2d7ff9;color:#fff;display:flex;align-items:center;padding-left:18px;font-size:13px;font-weight:750;gap:6px;opacity:0;transition:opacity .12s}
+.task-swipe-actions{display:flex;align-items:stretch;margin-left:auto;pointer-events:auto}
+.swipe-btn{width:68px;border:0;color:#fff;font-size:12.5px;font-weight:750;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;padding:0}
+.swipe-btn-postpone{background:#f59e0b}
+.swipe-btn-expand{background:#2d7ff9}
+.task-swipe-wrap .task{position:relative;z-index:2;transition:transform .2s cubic-bezier(.22,1,.36,1);will-change:transform}
+.task-swipe-wrap.swiping .task{transition:none!important}
+.task.is-note{background:#fffdf6;border-color:#efe6cc}
+.note-icon{width:20px;height:20px;flex:none;display:inline-flex;align-items:center;justify-content:center;color:#d4941a}
+.note-preview{font-size:12.5px;color:#6c727c;margin-top:3px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+.task-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.task-tag-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:650;padding:1.5px 7px;border-radius:999px;line-height:1.35}
+.subtask-preview-list{margin-top:6px;display:grid;gap:3px;padding-left:2px}
+.subtask-mini{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#4b525c;line-height:1.35}
+.subtask-mini.done span{text-decoration:line-through;color:#9aa1ab}
+.subtask-mini-chk{width:15px;height:15px;border-radius:4px;border:1.5px solid #c5cbd4;background:#fff;padding:0;flex:none;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff}
+.subtask-mini.done .subtask-mini-chk{background:var(--blue);border-color:var(--blue)}
+.search-btn{width:34px!important;height:34px!important;min-width:34px;border-radius:50%!important;border:1px solid var(--line)!important;background:#fff!important;color:var(--ink)!important;display:inline-flex;align-items:center;justify-content:center;padding:0!important;transition:background .15s}
+.search-btn:hover{background:#f4f5f8!important}
+.search-input-wrap{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--line);border-radius:11px;background:#f8f9fb;margin-bottom:12px}
+.search-input-wrap:focus-within{border-color:#8bb8fc;background:#fff;box-shadow:0 0 0 3px rgba(45,127,249,.12)}
+.search-input-wrap input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:14.5px;padding:2px 0}
+.search-results{display:grid;gap:6px;max-height:54vh;overflow-y:auto}
+.search-item{display:flex;align-items:center;gap:10px;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;text-align:left;width:100%}
+.search-item:hover{background:#f8f9fb}
+.postpone-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+.postpone-choice{border:1px solid var(--line);background:#f8f9fb;border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:background .15s,border-color .15s}
+.postpone-choice:hover{background:#eef4ff;border-color:#8bb8fc}
+.postpone-choice strong{display:block;font-size:15px;color:var(--ink);margin-bottom:3px}
+.postpone-choice small{font-size:11.5px;color:var(--muted)}
+.expand-section{padding:12px 0;border-top:1px solid var(--line)}
+.expand-section:first-of-type{border-top:0;padding-top:4px}
+.expand-sec-title{font-size:12px;font-weight:750;color:var(--muted);margin-bottom:8px}
+.expand-note-btn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#f8f9fb;font-size:13.5px;font-weight:650;color:var(--ink)}
+.expand-note-btn.active{background:#fffdf6;border-color:#e8d399;color:#9b6a08}
+.tag-picker{display:flex;flex-wrap:wrap;gap:6px}
+.tag-pick-btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:650;color:var(--ink);display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+.tag-pick-btn.active{background:#eef4ff;border-color:#2d7ff9;color:#1f6feb}
+.tag-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.subtask-editor-list{display:grid;gap:6px;margin-bottom:8px;max-height:190px;overflow-y:auto}
+.subtask-editor-row{display:flex;align-items:center;gap:8px;padding:7px 9px;background:#f8f9fb;border:1px solid var(--line);border-radius:9px}
+.subtask-editor-row.done span{text-decoration:line-through;color:var(--muted)}
+.subtask-editor-row span{flex:1;min-width:0;font-size:13.5px;overflow-wrap:anywhere}
+.subtask-del-btn{border:0;background:none;color:#b8bec7;font-size:17px;padding:0 4px;cursor:pointer}
+.tag-manage-row{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#f8f9fb}
+.tag-color-dots{display:flex;gap:7px;margin:8px 0 12px}
+.tag-color-opt{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}
+.tag-color-opt.active{border-color:#1c1e21;transform:scale(1.12)}
+
 </style>
 </head>
 <body>
@@ -159,8 +212,12 @@ const seed=[
  {id:'a5',title:'마트에서 장보기',date:dayKey(moveDay(now,1)),time:'',repeat:'',done:false,createdAt:5},
  {id:'a6',title:'운동복 주문하기',date:dayKey(moveDay(now,2)),time:'',repeat:'',done:false,createdAt:6}
 ];
+const USER_TAGS_KEY='haru-tags-v1';
+const TAG_COLOR_PRESETS=['#2d7ff9','#12a150','#f59e0b','#e5484d','#8b5cf6','#64748b'];
+let userTags=[];try{userTags=JSON.parse(localStorage.getItem(USER_TAGS_KEY)||'[]');if(!Array.isArray(userTags))userTags=[]}catch(_){userTags=[]}
+function saveUserTags(){try{localStorage.setItem(USER_TAGS_KEY,JSON.stringify(userTags))}catch(_){}if(cloudUser&&cloudReady)scheduleCloudSync()}
 let tasks=seed,hadLocalData=false;
-try{const raw=localStorage.getItem(STORE);hadLocalData=raw!==null;const saved=JSON.parse(raw);if(Array.isArray(saved))tasks=saved.filter(t=>t&&typeof t.title==='string').map((t,idx)=>({id:String(t.id||Math.random()),title:t.title,description:String(t.description||''),date:t.date||'',time:to24(t.time),repeat:String(t.repeat||''),done:Boolean(t.done),notifiedAt:t.notifiedAt||'',createdAt:Number(t.createdAt)||(Date.now()-(saved.length-idx)*1000),googleTaskId:t.googleTaskId||'',googleUpdated:t.googleUpdated||'',googleSnapshot:t.googleSnapshot||'',localUpdated:t.localUpdated||''}))}catch(_){tasks=seed}
+try{const raw=localStorage.getItem(STORE);hadLocalData=raw!==null;const saved=JSON.parse(raw);if(Array.isArray(saved))tasks=saved.filter(t=>t&&typeof t.title==='string').map((t,idx)=>({id:String(t.id||Math.random()),title:t.title,description:String(t.description||''),date:t.date||'',time:to24(t.time),repeat:String(t.repeat||''),done:Boolean(t.done),isNote:Boolean(t.isNote),tags:Array.isArray(t.tags)?t.tags.map(String).filter(Boolean):[],subtasks:Array.isArray(t.subtasks)?t.subtasks.filter(s=>s&&typeof s.title==='string').map(s=>({id:String(s.id||Math.random().toString(36).slice(2,8)),title:s.title,done:Boolean(s.done)})):[],notifiedAt:t.notifiedAt||'',createdAt:Number(t.createdAt)||(Date.now()-(saved.length-idx)*1000),googleTaskId:t.googleTaskId||'',googleUpdated:t.googleUpdated||'',googleSnapshot:t.googleSnapshot||'',localUpdated:t.localUpdated||''}))}catch(_){tasks=seed}
 const FONT_SCALE_KEY='haru-font-scale-v1';
 let fontScale=Number(localStorage.getItem(FONT_SCALE_KEY)||'1');
 if(!Number.isFinite(fontScale)||fontScale<0.8||fontScale>1.35)fontScale=1;
@@ -604,7 +661,33 @@ function isRecurringTask(t){return Boolean(t.repeat||t.recurring===true||t.recur
 function repeatLabel(t){if(t.repeat==='daily')return '↻ 매일';if(t.repeat==='weekly')return '↻ 매주';if(t.repeat==='monthly')return '↻ 매월';if(t.repeat==='yearly')return '↻ 매년';if(isRecurringTask(t))return '↻ 반복';return ''}
 function confirmDeleteTask(id,onDeleted){const t=tasks.find(x=>x.id===id);if(!t)return;const back=document.createElement("div");back.className="modal-back";back.innerHTML="<div class=\"modal confirm-modal\" role=\"dialog\" aria-modal=\"true\"><h2>할 일 삭제</h2><p>“<b>"+esc(t.title)+"</b>” 할 일을 정말 삭제하시겠어요?</p><div class=\"actions\"><button class=\"cancel\" type=\"button\" data-cancel>취소</button><button class=\"danger\" type=\"button\" data-confirm-delete>삭제</button></div></div>";document.body.appendChild(back);back.onclick=e=>{if(e.target===back)back.remove()};back.querySelector("[data-cancel]").onclick=()=>back.remove();back.querySelector("[data-confirm-delete]").onclick=()=>{if(t.googleTaskId&&!googleDeleted.includes(t.id)){googleDeleted.push(t.googleTaskId);localStorage.setItem(GOOGLE_DELETED_KEY,JSON.stringify(googleDeleted));setTimeout(()=>{if(googleAccessToken)syncGoogleTasks(false)},0)}tasks=tasks.filter(x=>x.id!==id);persist();if(cloudUser&&cloudReady)saveCloud();back.remove();if(onDeleted)onDeleted();else render()};}
 function toggleTask(id){const t=tasks.find(x=>x.id===id);if(!t)return;const wasDone=t.done;t.done=!wasDone;t.localUpdated=new Date().toISOString();if(!wasDone&&t.repeat){const nextDate=getNextRepeatDate(t.date,t.repeat);if(nextDate){const alreadyHasNext=tasks.some(x=>!x.done&&x.title===t.title&&x.date===nextDate);if(!alreadyHasNext){const nextTask={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:t.title,description:t.description||'',date:nextDate,time:t.time||'',repeat:t.repeat,done:false,notifiedAt:'',createdAt:Date.now(),localUpdated:new Date().toISOString()};tasks.unshift(nextTask);const repName=t.repeat==='daily'?'내일':(t.repeat==='weekly'?'다음 주':(t.repeat==='monthly'?'다음 달':'내년'));showNotice('↻ 반복 일정 완료: '+repName+'('+nextDate+') 일정이 등록되었어요.')}}}persist();if(googleAccessToken&&!isUserTyping())syncGoogleTasks(false)}
-function row(t){const overdue=!t.done&&t.date&&t.date<dayKey(now);const dateText=overdue?' · 미완료':(!t.date?' · 날짜 없음':'');const rep=repeatLabel(t);return '<article class="task '+(t.done?'completed':'')+(overdue?' overdue':'')+'" data-task-id="'+esc(t.id)+'" data-task-date="'+esc(t.date||'')+'" draggable="true"><button class="check" type="button" data-toggle="'+esc(t.id)+'" aria-label="완료">'+(t.done?'✓':'')+'</button><div class="task-main"><button class="task-title" type="button" data-edit="'+esc(t.id)+'">'+esc(t.title)+'</button><div class="meta">'+(rep?'<span class="tag">'+rep+'</span>':'')+(t.time?esc(t.time):'')+esc(dateText)+'</div></div><button class="delete" type="button" data-delete="'+esc(t.id)+'" aria-label="삭제">×</button></article>'}
+function renderTagChips(tagIds){
+  if(!Array.isArray(tagIds)||!tagIds.length)return '';
+  const chips=tagIds.map(id=>userTags.find(x=>x.id===id||x.name===id)).filter(Boolean);
+  if(!chips.length)return '';
+  return '<div class="task-tags">'+chips.map(tg=>{
+    const bg=hexToRgba(tg.color||'#2d7ff9',0.14)||'#eef4ff';
+    const fg=readableEventTextColor(tg.color||'#2d7ff9')||'#1f6feb';
+    return '<span class="task-tag-chip" style="background:'+bg+';color:'+esc(fg)+'">#'+esc(tg.name)+'</span>';
+  }).join('')+'</div>';
+}
+function renderSubtasksPreview(t){
+  if(!Array.isArray(t.subtasks)||!t.subtasks.length)return '';
+  return '<div class="subtask-preview-list">'+t.subtasks.map(s=>'<div class="subtask-mini'+(s.done?' done':'')+'"><button type="button" class="subtask-mini-chk" data-subtask-toggle="'+esc(t.id)+'" data-sub-id="'+esc(s.id)+'" aria-label="세부 할 일 완료">'+(s.done?'✓':'')+'</button><span>'+esc(s.title)+'</span></div>').join('')+'</div>';
+}
+function row(t){
+  const overdue=!t.done&&!t.isNote&&t.date&&t.date<dayKey(now);
+  const dateText=overdue?' · 미완료':(!t.date?' · 날짜 없음':'');
+  const rep=repeatLabel(t);
+  const subCount=Array.isArray(t.subtasks)&&t.subtasks.length?(' · '+t.subtasks.filter(s=>s.done).length+'/'+t.subtasks.length):'';
+  const leftEl=t.isNote
+    ?'<span class="note-icon" aria-label="노트" title="노트">'+THINGS_ICONS.note(18)+'</span>'
+    :'<button class="check" type="button" data-toggle="'+esc(t.id)+'" aria-label="완료">'+(t.done?'✓':'')+'</button>';
+  const notePrev=(t.isNote&&t.description)?'<div class="note-preview">'+esc(t.description)+'</div>':'';
+  const tagsHtml=renderTagChips(t.tags);
+  const subsHtml=renderSubtasksPreview(t);
+  return '<div class="task-swipe-wrap" data-swipe-wrap="'+esc(t.id)+'"><div class="task-swipe-bg"><div class="task-swipe-complete-bg">'+(t.done?'↩ 미완료':'✓ 완료')+'</div><div class="task-swipe-actions"><button type="button" class="swipe-btn swipe-btn-postpone" data-swipe-postpone="'+esc(t.id)+'"><span>연기</span></button><button type="button" class="swipe-btn swipe-btn-expand" data-swipe-expand="'+esc(t.id)+'"><span>확장</span></button></div></div><article class="task '+(t.done?'completed ':'')+(t.isNote?'is-note ':'')+(overdue?'overdue':'')+'" data-task-id="'+esc(t.id)+'" data-task-date="'+esc(t.date||'')+'" draggable="true">'+leftEl+'<div class="task-main"><button class="task-title" type="button" data-edit="'+esc(t.id)+'">'+esc(t.title)+'</button>'+notePrev+subsHtml+tagsHtml+'<div class="meta">'+(t.isNote?'<span class="tag" style="background:#fef3c7;color:#a16207">노트</span>':'')+(rep?'<span class="tag">'+rep+'</span>':'')+(t.time?esc(t.time):'')+esc(dateText)+esc(subCount)+'</div></div><button class="delete" type="button" data-delete="'+esc(t.id)+'" aria-label="삭제">×</button></article></div>';
+}
 function empty(msg){return '<div class="empty">'+msg+'</div>'}
 function section(title,arr){return '<div class="bar">'+title+'<small>'+arr.length+'개</small></div><div class="list">'+(arr.length?arr.map(row).join(''):empty('표시할 할 일이 없어요.'))+'</div>'}
 const THINGS_ICONS={
@@ -612,7 +695,9 @@ const THINGS_ICONS={
   today:(s=20)=>'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="#f5b800"><path d="M12 2.4l2.85 5.77 6.37.93-4.61 4.49 1.09 6.34L12 16.93l-5.7 3 1.09-6.34L2.78 9.1l6.37-.93L12 2.4z"/></svg>',
   next:(s=20)=>'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none"><rect x="3" y="4.5" width="18" height="16.5" rx="4" fill="#e5484d" fill-opacity=".14" stroke="#e5484d" stroke-width="1.8"/><path d="M3 9.5h18" stroke="#e5484d" stroke-width="1.8"/><path d="M8 2.8v3.2M16 2.8v3.2" stroke="#e5484d" stroke-width="1.8" stroke-linecap="round"/><rect x="7" y="12.5" width="4" height="4" rx="1" fill="#e5484d"/><circle cx="15.5" cy="14.5" r="1.5" fill="#e5484d"/></svg>',
   calendar:(s=20)=>'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none"><rect x="3" y="4.5" width="18" height="16.5" rx="4" fill="#2d7ff9" fill-opacity=".13" stroke="#2d7ff9" stroke-width="1.8"/><path d="M3 9.5h18" stroke="#2d7ff9" stroke-width="1.8"/><path d="M8 2.8v3.2M16 2.8v3.2" stroke="#2d7ff9" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="13.2" r="1.25" fill="#2d7ff9"/><circle cx="12" cy="13.2" r="1.25" fill="#2d7ff9"/><circle cx="16" cy="13.2" r="1.25" fill="#2d7ff9"/><circle cx="8" cy="17" r="1.25" fill="#2d7ff9"/><circle cx="12" cy="17" r="1.25" fill="#2d7ff9"/></svg>',
-  evening:(s=15)=>'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="#5b6ad0"><path d="M20.35 14.37A8.5 8.5 0 0 1 9.63 3.65a.75.75 0 0 0-.98-.9A9.5 9.5 0 1 0 21.25 15.35a.75.75 0 0 0-.9-.98z"/></svg>'
+  evening:(s=15)=>'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="#5b6ad0"><path d="M20.35 14.37A8.5 8.5 0 0 1 9.63 3.65a.75.75 0 0 0-.98-.9A9.5 9.5 0 1 0 21.25 15.35a.75.75 0 0 0-.9-.98z"/></svg>',
+  search:(s=16)=>'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+  note:(s=18)=>'<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>'
 };
 function timeSection(title,hint,secKey,arr,ico=''){return '<div class="time-section" data-time-section="'+secKey+'"><div class="time-section-bar"><span class="sec-title">'+(ico||'')+title+' <small>'+hint+'</small></span><b>'+arr.length+'개</b></div><div class="time-dropzone list" data-section="'+secKey+'">'+(arr.length?arr.map(row).join(''):'<div class="section-empty">'+title+' 할 일을 여기에 드래그해 옮길 수 있어요</div>')+'</div></div>'}
 function hexToRgba(hex,alpha){
@@ -724,8 +809,8 @@ function calendarView(){
 function isUserTyping(){if(document.querySelector('.modal-back'))return true;const active=document.activeElement;if(active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA'||active.tagName==='SELECT'))return true;const inputs=document.querySelectorAll('.composer input[name="task"]');for(const input of inputs){if(input.value&&input.value.trim().length>0)return true}return false}
 let pendingBackgroundRender=false;
 function requestBackgroundRender(){if(isUserTyping()){pendingBackgroundRender=true;const active=document.activeElement;if(active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA')){const onBlur=()=>{active.removeEventListener('blur',onBlur);setTimeout(()=>{if(pendingBackgroundRender&&!isUserTyping()){pendingBackgroundRender=false;render()}},150)};active.addEventListener('blur',onBlur)}return}pendingBackgroundRender=false;render()}
-function taskFingerprint(list){return JSON.stringify((list||[]).map(t=>[t.id,t.title,t.description||'',t.date||'',t.time||'',t.repeat||'',t.done,t.googleTaskId||'']))}
-function render(){if(view==='calendar'&&!calScrollNeedSnap){const prevSw=document.querySelector('.cal-scroll-wrap');if(prevSw)calSavedScrollTop=prevSw.scrollTop}document.documentElement.dataset.view=view;document.body.dataset.view=view;const active=document.activeElement;let activeState=null;if(active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA')){const form=active.closest('form');activeState={id:active.id||'',name:active.name||'',value:active.value||'',defaultDate:form?.dataset?.defaultDate||'',start:active.selectionStart,end:active.selectionEnd}}if(view!=='calendar')document.querySelector('.day-popover-back')?.remove();const root=document.getElementById('app');root.innerHTML='<div class="layout"><aside class="side"><div class="brand"><span class="logo">'+THINGS_ICONS.logo+'</span>하루</div><nav class="nav">'+nav('today','오늘',THINGS_ICONS.today(19))+nav('next','예정',THINGS_ICONS.next(19))+nav('calendar','캘린더',THINGS_ICONS.calendar(19))+'</nav><div class="note">오늘도 충분히 잘하고 있어요.<br>할 일은 하나씩, 나만의 속도로.</div></aside><main class="main" data-active-view="'+view+'"><header class="top"><span>'+fmt(now,{year:'numeric',month:'long',day:'numeric',weekday:'long'})+'</span><div class="top-actions"><span class="sync-status" id="syncStatus">기기 내 저장</span><button type="button" class="settings-gear-btn" data-settings aria-label="설정" title="설정">⚙️</button></div></header>'+todayView()+nextView()+calendarView()+'</main><nav class="bottom">'+nav('today','오늘',THINGS_ICONS.today(21))+nav('next','예정',THINGS_ICONS.next(21))+nav('calendar','캘린더',THINGS_ICONS.calendar(21))+'</nav></div>';bind();updateAccountButton();ensurePwaInstallButton();if(activeState){let target=null;if(activeState.id)target=document.getElementById(activeState.id);if(!target&&activeState.name){target=document.querySelector('.view.active form[data-default-date="'+esc(activeState.defaultDate)+'"] input[name="'+esc(activeState.name)+'"]')||document.querySelector('.view.active input[name="'+esc(activeState.name)+'"]')}if(target){target.value=activeState.value;try{target.focus();if(typeof activeState.start==='number')target.setSelectionRange(activeState.start,activeState.end)}catch(_){}}}}function edit(id){
+function taskFingerprint(list){return JSON.stringify((list||[]).map(t=>[t.id,t.title,t.description||'',t.date||'',t.time||'',t.repeat||'',t.done,!!t.isNote,t.tags||[],t.subtasks||[],t.googleTaskId||'']))}
+function render(){if(view==='calendar'&&!calScrollNeedSnap){const prevSw=document.querySelector('.cal-scroll-wrap');if(prevSw)calSavedScrollTop=prevSw.scrollTop}document.documentElement.dataset.view=view;document.body.dataset.view=view;const active=document.activeElement;let activeState=null;if(active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA')){const form=active.closest('form');activeState={id:active.id||'',name:active.name||'',value:active.value||'',defaultDate:form?.dataset?.defaultDate||'',start:active.selectionStart,end:active.selectionEnd}}if(view!=='calendar')document.querySelector('.day-popover-back')?.remove();const root=document.getElementById('app');root.innerHTML='<div class="layout"><aside class="side"><div class="brand"><span class="logo">'+THINGS_ICONS.logo+'</span>하루</div><nav class="nav">'+nav('today','오늘',THINGS_ICONS.today(19))+nav('next','예정',THINGS_ICONS.next(19))+nav('calendar','캘린더',THINGS_ICONS.calendar(19))+'</nav><div class="note">오늘도 충분히 잘하고 있어요.<br>할 일은 하나씩, 나만의 속도로.</div></aside><main class="main" data-active-view="'+view+'"><header class="top"><span>'+fmt(now,{year:'numeric',month:'long',day:'numeric',weekday:'long'})+'</span><div class="top-actions"><span class="sync-status" id="syncStatus">기기 내 저장</span><button type="button" class="search-btn" data-search aria-label="빠른 검색" title="빠른 검색 (⌘K)">'+THINGS_ICONS.search(16)+'</button><button type="button" class="settings-gear-btn" data-settings aria-label="설정" title="설정">⚙️</button></div></header>'+todayView()+nextView()+calendarView()+'</main><nav class="bottom">'+nav('today','오늘',THINGS_ICONS.today(21))+nav('next','예정',THINGS_ICONS.next(21))+nav('calendar','캘린더',THINGS_ICONS.calendar(21))+'</nav></div>';bind();updateAccountButton();ensurePwaInstallButton();if(activeState){let target=null;if(activeState.id)target=document.getElementById(activeState.id);if(!target&&activeState.name){target=document.querySelector('.view.active form[data-default-date="'+esc(activeState.defaultDate)+'"] input[name="'+esc(activeState.name)+'"]')||document.querySelector('.view.active input[name="'+esc(activeState.name)+'"]')}if(target){target.value=activeState.value;try{target.focus();if(typeof activeState.start==='number')target.setSelectionRange(activeState.start,activeState.end)}catch(_){}}}}function edit(id){
   const t=tasks.find(x=>x.id===id);
   if(!t)return;
   const back=document.createElement('div');
@@ -823,14 +908,26 @@ function attachTaskDragEvents(task,onMovedCallback){
     if(e.touches.length!==1)return;
     const touch=e.touches[0];
     const target=e.target;
-    if(target.closest('.check')||target.closest('.delete'))return;
+    if(target.closest('.check')||target.closest('.delete')||target.closest('.subtask-mini-chk')||target.closest('.swipe-btn'))return;
+
+    const wrap=task.closest('.task-swipe-wrap');
+    document.querySelectorAll('.task-swipe-wrap.swipe-open').forEach(w=>{
+      if(w!==wrap){
+        w.classList.remove('swipe-open');
+        const tEl=w.querySelector('.task');
+        if(tEl)tEl.style.transform='';
+      }
+    });
+    const wasSwipeOpen=Boolean(wrap&&wrap.classList.contains('swipe-open'));
+    const baseOffset=wasSwipeOpen?-136:0;
 
     const startX=touch.clientX,startY=touch.clientY;
-    let isDragging=false,hasMovedEnough=false,ghost=null,lastClientX=startX,lastClientY=startY;
+    let isDragging=false,isSwipingTask=false,hasMovedEnough=false,ghost=null,lastClientX=startX,lastClientY=startY;
     const popover=document.querySelector('.day-popover');
     const popoverBack=document.querySelector('.day-popover-back');
 
     const holdTimer=setTimeout(()=>{
+      if(isSwipingTask||wasSwipeOpen)return;
       isDragging=true;
       document.body.classList.add('is-task-dragging');
       try{window.getSelection()?.removeAllRanges()}catch(_){}
@@ -853,7 +950,25 @@ function attachTaskDragEvents(task,onMovedCallback){
       lastClientX=t.clientX;lastClientY=t.clientY;
       const dx=t.clientX-startX,dy=t.clientY-startY;
       if(!isDragging){
-        if(Math.abs(dx)>10||Math.abs(dy)>10)clearTimeout(holdTimer);
+        if(!isSwipingTask){
+          if(wrap&&Math.abs(dx)>10&&Math.abs(dx)>Math.abs(dy)*1.25){
+            isSwipingTask=true;
+            clearTimeout(holdTimer);
+            wrap.classList.add('swiping');
+          }else if(Math.abs(dx)>10||Math.abs(dy)>10){
+            clearTimeout(holdTimer);
+            return;
+          }else{
+            return;
+          }
+        }
+        if(isSwipingTask){
+          if(ev.cancelable)ev.preventDefault();
+          const nextX=Math.max(-150,Math.min(105,baseOffset+dx));
+          task.style.transform='translateX('+nextX+'px)';
+          const cBg=wrap.querySelector('.task-swipe-complete-bg');
+          if(cBg)cBg.style.opacity=nextX>0?String(Math.min(1,nextX/68)):'0';
+        }
         return;
       }
       if(ev.cancelable)ev.preventDefault();
@@ -898,6 +1013,7 @@ function attachTaskDragEvents(task,onMovedCallback){
     function cleanupTouchDrag(){
       clearTimeout(holdTimer);
       document.body.classList.remove('is-task-dragging');
+      if(wrap)wrap.classList.remove('swiping');
       window.removeEventListener('touchmove',onTouchMove);
       window.removeEventListener('touchend',onTouchEnd);
       window.removeEventListener('touchcancel',onTouchCancel);
@@ -909,15 +1025,47 @@ function attachTaskDragEvents(task,onMovedCallback){
     }
 
     function onTouchCancel(){
+      if(isSwipingTask&&wrap){
+        task.style.transform=wasSwipeOpen?'translateX(-136px)':'';
+        const cBg=wrap.querySelector('.task-swipe-complete-bg');
+        if(cBg)cBg.style.opacity='0';
+      }
       cleanupTouchDrag();
     }
 
     function onTouchEnd(){
       const moved=hasMovedEnough;
       const dragging=isDragging;
+      const swiping=isSwipingTask;
+      const finalX=Math.max(-150,Math.min(105,baseOffset+(lastClientX-startX)));
       if(ghost){ghost.style.display='none';}
       const elUnder=(dragging&&moved)?document.elementFromPoint(lastClientX,lastClientY):null;
       cleanupTouchDrag();
+
+      if(swiping&&wrap){
+        suppressClickUntil=Date.now()+260;
+        const cBg=wrap.querySelector('.task-swipe-complete-bg');
+        if(cBg)cBg.style.opacity='0';
+        if(finalX>=68){
+          task.style.transform='';
+          wrap.classList.remove('swipe-open');
+          handleToggleWithAnimation(taskId,task.querySelector('.check')||task,onMovedCallback);
+        }else if(finalX<=-52){
+          task.style.transform='translateX(-136px)';
+          wrap.classList.add('swipe-open');
+        }else{
+          task.style.transform='';
+          wrap.classList.remove('swipe-open');
+        }
+        return;
+      }
+
+      if(wasSwipeOpen&&!dragging&&Math.hypot(lastClientX-startX,lastClientY-startY)<10&&wrap){
+        task.style.transform='';
+        wrap.classList.remove('swipe-open');
+        suppressClickUntil=Date.now()+220;
+        return;
+      }
 
       if(dragging&&moved){
         suppressClickUntil=Date.now()+600;
@@ -1038,8 +1186,8 @@ function switchMonth(delta){
     render();
   },225);
 }
-function bind(){document.querySelectorAll('.nav button[data-view], .bottom button[data-view]').forEach(b=>b.onclick=e=>{e.stopPropagation();const targetView=b.dataset.view;if(view==='next'&&targetView==='next'){window.scrollTo({top:0,behavior:'smooth'});document.documentElement.scrollTo({top:0,behavior:'smooth'});document.body.scrollTo({top:0,behavior:'smooth'});const m=document.querySelector('.main');if(m)m.scrollTo({top:0,behavior:'smooth'});return}if(view==='today'&&targetView==='today'){window.scrollTo({top:0,behavior:'smooth'});document.documentElement.scrollTo({top:0,behavior:'smooth'});document.body.scrollTo({top:0,behavior:'smooth'});const m=document.querySelector('.main');if(m)m.scrollTo({top:0,behavior:'smooth'});return}if(view==='calendar'&&targetView==='calendar'){month=new Date(now.getFullYear(),now.getMonth(),1);selected=dayKey(now);calScrollNeedSnap=true}if(view!==targetView){calSwitching=false;if(targetView==='calendar')calScrollNeedSnap=true;document.querySelector('.day-popover-back')?.remove()}view=targetView;render();if(view==='calendar'){window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;const m=document.querySelector('.main');if(m)m.scrollTop=0}});document.querySelectorAll('[data-today]').forEach(b=>b.onclick=()=>{calSwitching=false;view='today';month=new Date(now.getFullYear(),now.getMonth(),1);selected=dayKey(now);render()});document.querySelectorAll('[data-month]').forEach(b=>b.onclick=()=>{switchMonth(Number(b.dataset.month))});const calPager=document.querySelector('.cal-pager');const calTrack=document.querySelector('.cal-track');const calScrollWrap=document.querySelector('.cal-scroll-wrap');if(calPager&&calScrollWrap&&view==='calendar'){const syncRowH=()=>{const h=calPager.clientHeight;if(h>60)calPager.style.setProperty('--cal-row-h',Math.max(64,Math.floor(h/6))+'px')};syncRowH();requestAnimationFrame(()=>{syncRowH();const activeYm=month.getFullYear()+'-'+String(month.getMonth()+1).padStart(2,'0');if(calScrollNeedSnap){const targetRow=calScrollWrap.querySelector('.cal-week-row[data-month-start="'+activeYm+'"]');if(targetRow)calScrollWrap.scrollTop=targetRow.offsetTop;calScrollNeedSnap=false;calSavedScrollTop=null}else if(calSavedScrollTop!==null){calScrollWrap.scrollTop=calSavedScrollTop;calSavedScrollTop=null}});let curYm=month.getFullYear()+'-'+String(month.getMonth()+1).padStart(2,'0'),scrollRaf=0;calScrollWrap.addEventListener('scroll',()=>{if(scrollRaf)return;scrollRaf=requestAnimationFrame(()=>{scrollRaf=0;const rowH=parseFloat(getComputedStyle(calPager).getPropertyValue('--cal-row-h'))||105;const rows=calScrollWrap.querySelectorAll('.cal-week-row');const idx=Math.max(0,Math.min(rows.length-1,Math.floor((calScrollWrap.scrollTop+rowH*1.25)/rowH)));const row=rows[idx];const nextYm=row?.dataset?.weekMid;if(nextYm&&nextYm!==curYm){curYm=nextYm;const parts=nextYm.split('-');month=new Date(Number(parts[0]),Number(parts[1])-1,1);const titleEl=document.getElementById('calMonthTitle');if(titleEl)titleEl.textContent=Number(parts[0])+'년 '+Number(parts[1])+'월';calScrollWrap.querySelectorAll('.cell').forEach(c=>c.classList.toggle('other',c.dataset.ym!==nextYm));syncCalSidePanels()}})},{passive:true})}const calendar=document.querySelector('.calendar');if(calendar&&calTrack){let swipeStart=null,swiping=false,lastDx=0,lastDy=0;calendar.addEventListener('contextmenu',e=>e.preventDefault());calendar.addEventListener('touchstart',e=>{if(calSwitching||e.touches.length!==1||document.querySelector('.task-touch-dragging,.day-popover-back,.modal-back'))return;const t=e.touches[0];swipeStart={x:t.clientX,y:t.clientY,time:Date.now()};swiping=false;lastDx=0;lastDy=0},{passive:true});calendar.addEventListener('touchmove',e=>{if(!swipeStart||e.touches.length!==1)return;if(document.querySelector('.task-touch-dragging')){swipeStart=null;swiping=false;calTrack.style.transition='';calTrack.style.transform='translate3d(-33.333333%,0,0)';return}const t=e.touches[0];lastDx=t.clientX-swipeStart.x;lastDy=t.clientY-swipeStart.y;if(!swiping){if(Math.abs(lastDx)>8&&Math.abs(lastDx)>Math.abs(lastDy)*1.15){swiping=true}else if(Math.abs(lastDy)>8&&Math.abs(lastDy)>=Math.abs(lastDx)){swipeStart=null;return}}if(swiping){if(e.cancelable)e.preventDefault();calTrack.style.transition='none';calTrack.style.transform='translate3d(calc(-33.333333% + '+lastDx+'px),0,0)'}},{passive:false});function finishSwipe(){if(!swipeStart)return;const dt=Date.now()-swipeStart.time,vx=Math.abs(lastDx)/Math.max(1,dt);const shouldSwitch=(Math.abs(lastDx)>=36||(Math.abs(lastDx)>=16&&vx>0.28))&&Math.abs(lastDx)>Math.abs(lastDy);const dir=lastDx<0?1:-1;swipeStart=null;if(shouldSwitch){swiping=false;suppressClickUntil=Date.now()+300;switchMonth(dir);return}if(swiping){swiping=false;calTrack.style.transition='transform .2s cubic-bezier(.22,1,.36,1)';calTrack.style.transform='translate3d(-33.333333%,0,0)'}}calendar.addEventListener('touchend',finishSwipe,{passive:true});calendar.addEventListener('touchcancel',()=>{swipeStart=null;swiping=false;calTrack.style.transition='transform .2s ease';calTrack.style.transform='translate3d(-33.333333%,0,0)'},{passive:true})}document.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{if(Date.now()<suppressClickUntil)return;selected=b.dataset.day;document.querySelectorAll('.cell.selected').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');const form=document.querySelector('.calendar-view [data-form]');if(form)form.dataset.defaultDate=selected;showDayPopup(selected,b)});document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=e=>{if(Date.now()<suppressClickUntil){e.stopPropagation();return}edit(b.dataset.edit)});document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=e=>{e.stopPropagation();handleToggleWithAnimation(b.dataset.toggle,b)});document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>confirmDeleteTask(b.dataset.delete));document.querySelectorAll('[data-form]').forEach(f=>{f.onsubmit=e=>{e.preventDefault();submitTask(f)};const input=f.querySelector('input[name="task"]');if(input)input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();submitTask(f)}}});document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const f=b.closest('form');if(f)submitTask(f)});document.querySelectorAll('[data-settings]').forEach(b=>b.onclick=openSettingsModal);
-document.querySelectorAll('[data-account]').forEach(b=>b.onclick=openAccount);document.querySelectorAll('[data-toggle-done]').forEach(b=>b.onclick=()=>{hideCompletedTasks=!hideCompletedTasks;localStorage.setItem('haru-hide-done-v1',hideCompletedTasks?'true':'false');render()});document.querySelectorAll('[data-ical]').forEach(b=>b.onclick=googleCalendarModal);document.querySelectorAll('[data-quick-add]').forEach(b=>{b.onclick=e=>{e.stopPropagation();const date=b.dataset.quickAdd;const wrap=document.getElementById('quick-add-'+date);if(!wrap)return;const isHidden=wrap.style.display==='none';wrap.style.display=isHidden?'block':'none';if(isHidden){const input=wrap.querySelector('input');input.value='';input.focus();const submitQuick=()=>{const val=input.value.trim();if(!val)return;const p=parse(val,date);if(!p.title)return;if(p.time)askNotice();const task={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),...p,date:p.date||date,done:false,notifiedAt:'',createdAt:Date.now(),localUpdated:new Date().toISOString()};tasks.unshift(task);persist();if(googleAccessToken)syncGoogleTasks(false);render()};input.onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();submitQuick()}};const btn=wrap.querySelector('button');if(btn)btn.onclick=submitQuick}}});setupDragAndDrop()}function normalizeTasks(list){const baseTime=Date.now()-((list||[]).length*1000);return Array.isArray(list)?list.filter(t=>t&&typeof t.title==='string').map((t,idx)=>({id:String(t.id||Math.random().toString(36).slice(2)),title:t.title,description:String(t.description||''),date:t.date||'',time:to24(t.time),repeat:String(t.repeat||''),done:Boolean(t.done),notifiedAt:t.notifiedAt||'',createdAt:Number(t.createdAt)||baseTime+(idx*1000),googleTaskId:t.googleTaskId||'',googleUpdated:t.googleUpdated||'',googleSnapshot:t.googleSnapshot||'',localUpdated:t.localUpdated||''})):[]}
+function bind(){document.querySelectorAll('.nav button[data-view], .bottom button[data-view]').forEach(b=>b.onclick=e=>{e.stopPropagation();const targetView=b.dataset.view;if(view==='next'&&targetView==='next'){window.scrollTo({top:0,behavior:'smooth'});document.documentElement.scrollTo({top:0,behavior:'smooth'});document.body.scrollTo({top:0,behavior:'smooth'});const m=document.querySelector('.main');if(m)m.scrollTo({top:0,behavior:'smooth'});return}if(view==='today'&&targetView==='today'){window.scrollTo({top:0,behavior:'smooth'});document.documentElement.scrollTo({top:0,behavior:'smooth'});document.body.scrollTo({top:0,behavior:'smooth'});const m=document.querySelector('.main');if(m)m.scrollTo({top:0,behavior:'smooth'});return}if(view==='calendar'&&targetView==='calendar'){month=new Date(now.getFullYear(),now.getMonth(),1);selected=dayKey(now);calScrollNeedSnap=true}if(view!==targetView){calSwitching=false;if(targetView==='calendar')calScrollNeedSnap=true;document.querySelector('.day-popover-back')?.remove()}view=targetView;render();if(view==='calendar'){window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;const m=document.querySelector('.main');if(m)m.scrollTop=0}});document.querySelectorAll('[data-today]').forEach(b=>b.onclick=()=>{calSwitching=false;view='today';month=new Date(now.getFullYear(),now.getMonth(),1);selected=dayKey(now);render()});document.querySelectorAll('[data-month]').forEach(b=>b.onclick=()=>{switchMonth(Number(b.dataset.month))});const calPager=document.querySelector('.cal-pager');const calTrack=document.querySelector('.cal-track');const calScrollWrap=document.querySelector('.cal-scroll-wrap');if(calPager&&calScrollWrap&&view==='calendar'){const syncRowH=()=>{const h=calPager.clientHeight;if(h>60)calPager.style.setProperty('--cal-row-h',Math.max(64,Math.floor(h/6))+'px')};syncRowH();requestAnimationFrame(()=>{syncRowH();const activeYm=month.getFullYear()+'-'+String(month.getMonth()+1).padStart(2,'0');if(calScrollNeedSnap){const targetRow=calScrollWrap.querySelector('.cal-week-row[data-month-start="'+activeYm+'"]');if(targetRow)calScrollWrap.scrollTop=targetRow.offsetTop;calScrollNeedSnap=false;calSavedScrollTop=null}else if(calSavedScrollTop!==null){calScrollWrap.scrollTop=calSavedScrollTop;calSavedScrollTop=null}});let curYm=month.getFullYear()+'-'+String(month.getMonth()+1).padStart(2,'0'),scrollRaf=0;calScrollWrap.addEventListener('scroll',()=>{if(scrollRaf)return;scrollRaf=requestAnimationFrame(()=>{scrollRaf=0;const rowH=parseFloat(getComputedStyle(calPager).getPropertyValue('--cal-row-h'))||105;const rows=calScrollWrap.querySelectorAll('.cal-week-row');const idx=Math.max(0,Math.min(rows.length-1,Math.floor((calScrollWrap.scrollTop+rowH*1.25)/rowH)));const row=rows[idx];const nextYm=row?.dataset?.weekMid;if(nextYm&&nextYm!==curYm){curYm=nextYm;const parts=nextYm.split('-');month=new Date(Number(parts[0]),Number(parts[1])-1,1);const titleEl=document.getElementById('calMonthTitle');if(titleEl)titleEl.textContent=Number(parts[0])+'년 '+Number(parts[1])+'월';calScrollWrap.querySelectorAll('.cell').forEach(c=>c.classList.toggle('other',c.dataset.ym!==nextYm));syncCalSidePanels()}})},{passive:true})}const calendar=document.querySelector('.calendar');if(calendar&&calTrack){let swipeStart=null,swiping=false,lastDx=0,lastDy=0;calendar.addEventListener('contextmenu',e=>e.preventDefault());calendar.addEventListener('touchstart',e=>{if(calSwitching||e.touches.length!==1||document.querySelector('.task-touch-dragging,.day-popover-back,.modal-back'))return;const t=e.touches[0];swipeStart={x:t.clientX,y:t.clientY,time:Date.now()};swiping=false;lastDx=0;lastDy=0},{passive:true});calendar.addEventListener('touchmove',e=>{if(!swipeStart||e.touches.length!==1)return;if(document.querySelector('.task-touch-dragging')){swipeStart=null;swiping=false;calTrack.style.transition='';calTrack.style.transform='translate3d(-33.333333%,0,0)';return}const t=e.touches[0];lastDx=t.clientX-swipeStart.x;lastDy=t.clientY-swipeStart.y;if(!swiping){if(Math.abs(lastDx)>8&&Math.abs(lastDx)>Math.abs(lastDy)*1.15){swiping=true}else if(Math.abs(lastDy)>8&&Math.abs(lastDy)>=Math.abs(lastDx)){swipeStart=null;return}}if(swiping){if(e.cancelable)e.preventDefault();calTrack.style.transition='none';calTrack.style.transform='translate3d(calc(-33.333333% + '+lastDx+'px),0,0)'}},{passive:false});function finishSwipe(){if(!swipeStart)return;const dt=Date.now()-swipeStart.time,vx=Math.abs(lastDx)/Math.max(1,dt);const shouldSwitch=(Math.abs(lastDx)>=36||(Math.abs(lastDx)>=16&&vx>0.28))&&Math.abs(lastDx)>Math.abs(lastDy);const dir=lastDx<0?1:-1;swipeStart=null;if(shouldSwitch){swiping=false;suppressClickUntil=Date.now()+300;switchMonth(dir);return}if(swiping){swiping=false;calTrack.style.transition='transform .2s cubic-bezier(.22,1,.36,1)';calTrack.style.transform='translate3d(-33.333333%,0,0)'}}calendar.addEventListener('touchend',finishSwipe,{passive:true});calendar.addEventListener('touchcancel',()=>{swipeStart=null;swiping=false;calTrack.style.transition='transform .2s ease';calTrack.style.transform='translate3d(-33.333333%,0,0)'},{passive:true})}document.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{if(Date.now()<suppressClickUntil)return;selected=b.dataset.day;document.querySelectorAll('.cell.selected').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');const form=document.querySelector('.calendar-view [data-form]');if(form)form.dataset.defaultDate=selected;showDayPopup(selected,b)});document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=e=>{if(Date.now()<suppressClickUntil){e.stopPropagation();return}edit(b.dataset.edit)});document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=e=>{e.stopPropagation();handleToggleWithAnimation(b.dataset.toggle,b)});document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>confirmDeleteTask(b.dataset.delete));document.querySelectorAll('[data-form]').forEach(f=>{f.onsubmit=e=>{e.preventDefault();submitTask(f)};const input=f.querySelector('input[name="task"]');if(input)input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();submitTask(f)}}});document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const f=b.closest('form');if(f)submitTask(f)});document.querySelectorAll('[data-settings]').forEach(b=>b.onclick=openSettingsModal);document.querySelectorAll('[data-search]').forEach(b=>b.onclick=openQuickSearchModal);document.querySelectorAll('[data-swipe-postpone]').forEach(b=>b.onclick=e=>{e.stopPropagation();const wrap=b.closest('.task-swipe-wrap');if(wrap){wrap.classList.remove('swipe-open');const tEl=wrap.querySelector('.task');if(tEl)tEl.style.transform=''}openPostponeModal(b.dataset.swipePostpone)});document.querySelectorAll('[data-swipe-expand]').forEach(b=>b.onclick=e=>{e.stopPropagation();const wrap=b.closest('.task-swipe-wrap');if(wrap){wrap.classList.remove('swipe-open');const tEl=wrap.querySelector('.task');if(tEl)tEl.style.transform=''}openTaskExpandModal(b.dataset.swipeExpand)});document.querySelectorAll('[data-subtask-toggle]').forEach(b=>b.onclick=e=>{e.stopPropagation();const t=tasks.find(x=>x.id===b.dataset.subtaskToggle);if(!t||!Array.isArray(t.subtasks))return;const sub=t.subtasks.find(s=>s.id===b.dataset.subId);if(!sub)return;sub.done=!sub.done;t.localUpdated=new Date().toISOString();persist();render()});
+document.querySelectorAll('[data-account]').forEach(b=>b.onclick=openAccount);document.querySelectorAll('[data-toggle-done]').forEach(b=>b.onclick=()=>{hideCompletedTasks=!hideCompletedTasks;localStorage.setItem('haru-hide-done-v1',hideCompletedTasks?'true':'false');render()});document.querySelectorAll('[data-ical]').forEach(b=>b.onclick=googleCalendarModal);document.querySelectorAll('[data-quick-add]').forEach(b=>{b.onclick=e=>{e.stopPropagation();const date=b.dataset.quickAdd;const wrap=document.getElementById('quick-add-'+date);if(!wrap)return;const isHidden=wrap.style.display==='none';wrap.style.display=isHidden?'block':'none';if(isHidden){const input=wrap.querySelector('input');input.value='';input.focus();const submitQuick=()=>{const val=input.value.trim();if(!val)return;const p=parse(val,date);if(!p.title)return;if(p.time)askNotice();const task={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),...p,date:p.date||date,done:false,notifiedAt:'',createdAt:Date.now(),localUpdated:new Date().toISOString()};tasks.unshift(task);persist();if(googleAccessToken)syncGoogleTasks(false);render()};input.onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();submitQuick()}};const btn=wrap.querySelector('button');if(btn)btn.onclick=submitQuick}}});setupDragAndDrop()}function normalizeTasks(list){const baseTime=Date.now()-((list||[]).length*1000);return Array.isArray(list)?list.filter(t=>t&&typeof t.title==='string').map((t,idx)=>({id:String(t.id||Math.random().toString(36).slice(2)),title:t.title,description:String(t.description||''),date:t.date||'',time:to24(t.time),repeat:String(t.repeat||''),done:Boolean(t.done),isNote:Boolean(t.isNote),tags:Array.isArray(t.tags)?t.tags.map(String).filter(Boolean):[],subtasks:Array.isArray(t.subtasks)?t.subtasks.filter(s=>s&&typeof s.title==='string').map(s=>({id:String(s.id||Math.random().toString(36).slice(2,8)),title:s.title,done:Boolean(s.done)})):[],notifiedAt:t.notifiedAt||'',createdAt:Number(t.createdAt)||baseTime+(idx*1000),googleTaskId:t.googleTaskId||'',googleUpdated:t.googleUpdated||'',googleSnapshot:t.googleSnapshot||'',localUpdated:t.localUpdated||''})):[]}
 function updateSyncStatus(text){const el=document.getElementById('syncStatus');if(el)el.textContent=text}
 function updateAccountButton(){const b=document.querySelector('[data-account]');if(!b)return;b.textContent=cloudUser?'연결됨':'로그인';b.title=cloudUser?cloudUser.email:'PC·휴대폰 동기화';updateSyncStatus(cloudUser?(cloudReady?'동기화됨':'연결 중'):'기기 내 저장')}
 function extractCloudData(rawList){
@@ -1093,6 +1241,7 @@ async function saveCloud(){
       calendarEvents:calendarEvents||[],
       gcalCalendars:gcalCalendars||[],
       gcalSelectedIds:gcalSelectedIds,
+      userTags:userTags||[],
       icalUrl1:localStorage.getItem(ICAL_URL_KEY)||'',
       icalUrl2:localStorage.getItem(ICAL_URL_2_KEY)||''
     };
@@ -1142,6 +1291,10 @@ async function loadCloudTasks(user){
           gcalSelectedIds=calMeta.gcalSelectedIds;
           try{localStorage.setItem(GCAL_SELECTED_KEY,JSON.stringify(gcalSelectedIds))}catch(_){}
         }
+        if(Array.isArray(calMeta.userTags)){
+          userTags=calMeta.userTags;
+          try{localStorage.setItem(USER_TAGS_KEY,JSON.stringify(userTags))}catch(_){}
+        }
         if(calMeta.icalUrl1!==undefined)try{if(calMeta.icalUrl1)localStorage.setItem(ICAL_URL_KEY,calMeta.icalUrl1);else localStorage.removeItem(ICAL_URL_KEY)}catch(_){}
         if(calMeta.icalUrl2!==undefined)try{if(calMeta.icalUrl2)localStorage.setItem(ICAL_URL_2_KEY,calMeta.icalUrl2);else localStorage.removeItem(ICAL_URL_2_KEY)}catch(_){}
       }
@@ -1173,6 +1326,235 @@ function notesForTask(t){const markers=[markerFor(t.id),repeatMarker(t.repeat)].
 function descriptionFromNotes(notes){return String(notes||'').replace(/\[\[haru-task:[^\]]+\]\]/g,'').replace(/\[\[haru-repeat:[^\]]+\]\]/g,'').trim()}
 function markerId(notes){const m=String(notes||'').match(/\[\[haru-task:([^\]]+)\]\]/);return m?m[1]:''}
 async function syncGoogleTasks(manual=false){if(googleSyncBusy){googleSyncQueued=true;return false;}if(!googleAccessToken||Date.now()>=googleTokenExpires){try{if(!await renewGoogleAccessToken()){updateSyncStatus('Google 재연결 필요');if(manual)showNotice('Google 연결을 다시 해 주세요.');return false}}catch(error){updateSyncStatus('Google 연결 오류');if(manual)showNotice(error.message||'Google Tasks 연결을 갱신하지 못했어요.');return false}}googleSyncBusy=true;updateSyncStatus('Google 동기화 중…');try{const prevFp=taskFingerprint(tasks);let list=await googleApi('users/@me/lists?maxResults=100');const taskList=(list.items||[]).find(x=>x.id===googleTaskListId)||(list.items||[])[0];if(!taskList)throw new Error('Google Tasks 목록을 찾지 못했어요.');googleTaskListId=taskList.id;let remotes=[],page='';do{const pageData=await googleApi('lists/'+encodeURIComponent(googleTaskListId)+'/tasks?maxResults=100&showCompleted=true&showDeleted=true&showHidden=true'+(page?'&pageToken='+encodeURIComponent(page):''));remotes.push(...(pageData.items||[]));page=pageData.nextPageToken||''}while(page);const byGoogle=new Map(remotes.map(r=>[r.id,r])),byApp=new Map(tasks.map(t=>[t.id,t]));for(const id of googleDeleted.slice()){const remote=byGoogle.get(id);if(remote&&!remote.deleted)await googleApi('lists/'+encodeURIComponent(googleTaskListId)+'/tasks/'+encodeURIComponent(remote.id),{method:'DELETE'});googleDeleted=googleDeleted.filter(x=>x!==id)}localStorage.setItem(GOOGLE_DELETED_KEY,JSON.stringify(googleDeleted));const linkedRemote=new Set();for(const remote of remotes){if(remote.deleted)continue;let t=tasks.find(x=>x.googleTaskId===remote.id)||tasks.find(x=>markerId(remote.notes)===x.id);if(!t){t={id:markerId(remote.notes)||('g'+remote.id),title:remote.title||'할 일',description:descriptionFromNotes(remote.notes),date:googleDueDate(remote.due),time:'',repeat:repeatFromNotes(remote.notes),done:remote.status==='completed',notifiedAt:'',createdAt:Date.now(),googleTaskId:remote.id,googleUpdated:remote.updated||'',googleSnapshot:''};tasks.push(t);t.googleSnapshot=googleSnapshot(t);t.googleUpdated=remote.updated||'';linkedRemote.add(remote.id);continue}t.googleTaskId=remote.id;let snap=t.googleSnapshot||'';const legacySnap=JSON.stringify({title:t.title,date:t.date||'',done:!!t.done}),legacySnap2=JSON.stringify({title:t.title,description:t.description||'',date:t.date||'',done:!!t.done});if(!snap||snap===legacySnap||snap===legacySnap2){t.description=descriptionFromNotes(remote.notes);const rep=repeatFromNotes(remote.notes);if(rep||!t.repeat)t.repeat=rep;if(snap){t.googleSnapshot=googleSnapshot(t);snap=t.googleSnapshot}}const isLocalNewer=t.localUpdated&&(!t.googleUpdated||Date.parse(t.localUpdated)>Date.parse(t.googleUpdated));const localChanged=(snap&&googleSnapshot(t)!==snap)||isLocalNewer;const remoteChanged=snap&&String(remote.updated||'')!==String(t.googleUpdated||'')&&!isLocalNewer;if(localChanged){const patch={title:t.title,notes:notesForTask(t),status:t.done?'completed':'needsAction'};if(t.date)patch.due=t.date+'T00:00:00.000Z';else patch.due=null;const updated=await googleApi('lists/'+encodeURIComponent(googleTaskListId)+'/tasks/'+encodeURIComponent(remote.id),{method:'PATCH',body:JSON.stringify(patch)});remote.updated=updated.updated||new Date().toISOString();t.googleUpdated=remote.updated}else if(remoteChanged){t.title=remote.title||t.title;t.description=descriptionFromNotes(remote.notes);const rep=repeatFromNotes(remote.notes);if(rep)t.repeat=rep;t.date=googleDueDate(remote.due);t.done=remote.status==='completed'}t.googleUpdated=remote.updated||t.googleUpdated||'';t.googleSnapshot=googleSnapshot(t);linkedRemote.add(remote.id)}for(const t of tasks){if(t.googleTaskId&&linkedRemote.has(t.googleTaskId))continue;if(!t.googleTaskId){const remote=remotes.find(r=>!r.deleted&&markerId(r.notes)===t.id);if(remote){t.googleTaskId=remote.id;t.description=descriptionFromNotes(remote.notes);const rep=repeatFromNotes(remote.notes);if(rep)t.repeat=rep;t.googleUpdated=remote.updated||'';t.googleSnapshot=googleSnapshot(t);linkedRemote.add(remote.id);continue}const body={title:t.title,notes:notesForTask(t),status:t.done?'completed':'needsAction'};if(t.date)body.due=t.date+'T00:00:00.000Z';const created=await googleApi('lists/'+encodeURIComponent(googleTaskListId)+'/tasks',{method:'POST',body:JSON.stringify(body)});t.googleTaskId=created.id;t.googleUpdated=created.updated||'';t.googleSnapshot=googleSnapshot(t);linkedRemote.add(created.id)}}tasks=tasks.filter(t=>!t.googleTaskId||byGoogle.get(t.googleTaskId)?.deleted!==true);const nextFp=taskFingerprint(tasks);const tasksChanged=prevFp!==nextFp;try{localStorage.setItem(STORE,JSON.stringify(tasks));hadLocalData=true}catch(_){}if(cloudUser&&tasksChanged)scheduleCloudSync();updateSyncStatus('Google 동기화됨');if(tasksChanged)requestBackgroundRender();if(manual)showNotice('Google Tasks와 동기화했습니다.');return true}catch(error){updateSyncStatus('Google 연결 오류');if(manual)showNotice(error.message||'Google Tasks 동기화에 실패했어요.');return false}finally{googleSyncBusy=false;if(googleSyncQueued){googleSyncQueued=false;setTimeout(()=>syncGoogleTasks(false),200);}}}
+function openQuickSearchModal(){
+  document.querySelector('.quick-search-back')?.remove();
+  const back=document.createElement('div');
+  back.className='modal-back quick-search-back';
+  back.innerHTML='<div class="modal account-modal" role="dialog" aria-modal="true" style="max-height:86vh;display:flex;flex-direction:column"><h2 style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'+THINGS_ICONS.search(19)+'빠른 검색</h2><div class="search-input-wrap"><input type="search" id="quickSearchInput" placeholder="할 일, 메모, #태그, 일정 검색…" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"><button type="button" id="quickSearchClear" style="border:0;background:none;color:var(--muted);font-size:17px;padding:0 4px;display:none">×</button></div><div class="search-results" id="quickSearchResults"></div><div class="actions" style="margin-top:14px"><button class="cancel" type="button" data-close>닫기</button></div></div>';
+  document.body.appendChild(back);
+  back.onclick=e=>{if(e.target===back)back.remove()};
+  back.querySelector('[data-close]').onclick=()=>back.remove();
+  const input=back.querySelector('#quickSearchInput');
+  const clearBtn=back.querySelector('#quickSearchClear');
+  const resultsEl=back.querySelector('#quickSearchResults');
+
+  function renderResults(){
+    const q=input.value.trim().toLowerCase();
+    clearBtn.style.display=q?'block':'none';
+    const tagById=new Map(userTags.map(tg=>[tg.id,tg]));
+    const matchedTasks=tasks.filter(t=>{
+      if(!q)return !t.done;
+      const tagText=(t.tags||[]).map(id=>tagById.get(id)?.name||id).join(' ');
+      const subText=(t.subtasks||[]).map(s=>s.title).join(' ');
+      const hay=(t.title+' '+(t.description||'')+' '+tagText+' '+subText).toLowerCase();
+      return hay.includes(q.replace(/^#/,''));
+    }).slice(0,40);
+    const matchedEvents=q?calendarEvents.filter(ev=>String(ev.title||'').toLowerCase().includes(q)).slice(0,15):[];
+
+    let html='';
+    if(!matchedTasks.length&&!matchedEvents.length){
+      html='<div class="empty" style="padding:20px 12px">검색 결과가 없어요.</div>';
+    }else{
+      if(matchedTasks.length){
+        html+=matchedTasks.map(t=>{
+          const dateInfo=t.date?(t.date+(t.time?' '+t.time:'')):'날짜 없음';
+          const tagHtml=renderTagChips(t.tags);
+          return '<div class="search-item" data-search-edit="'+esc(t.id)+'">'
+            +(t.isNote
+              ?'<span class="note-icon">'+THINGS_ICONS.note(17)+'</span>'
+              :'<button type="button" class="check" data-search-toggle="'+esc(t.id)+'" style="'+(t.done?'background:var(--blue);border-color:var(--blue)':'')+'">'+(t.done?'✓':'')+'</button>')
+            +'<div style="flex:1;min-width:0"><div style="font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'+(t.done?'text-decoration:line-through;color:var(--muted)':'color:var(--ink)')+'">'+esc(t.title)+'</div>'+tagHtml+'<div style="font-size:11.5px;color:var(--muted);margin-top:2px">'+(t.isNote?'노트 · ':'')+(t.done?'완료 · ':'')+esc(dateInfo)+'</div></div></div>';
+        }).join('');
+      }
+      if(matchedEvents.length){
+        html+='<div style="font-size:11.5px;font-weight:700;color:var(--muted);margin:8px 2px 2px">구글 캘린더 일정</div>';
+        html+=matchedEvents.map(ev=>'<div class="next-event-card"><span class="cal-event-badge" style="'+eventBadgeStyle(ev)+'">일정</span><span class="cal-event-title">'+esc(ev.title)+'</span><span class="cal-event-time">'+esc(ev.date)+(ev.isAllDay?' 종일':' '+esc(ev.time||''))+'</span></div>').join('');
+      }
+    }
+    resultsEl.innerHTML=html;
+    resultsEl.querySelectorAll('[data-search-toggle]').forEach(btn=>{
+      btn.onclick=e=>{
+        e.stopPropagation();
+        toggleTask(btn.dataset.searchToggle);
+        render();
+        renderResults();
+      };
+    });
+    resultsEl.querySelectorAll('[data-search-edit]').forEach(item=>{
+      item.onclick=()=>{
+        const id=item.dataset.searchEdit;
+        back.remove();
+        edit(id);
+      };
+    });
+  }
+  input.oninput=renderResults;
+  clearBtn.onclick=()=>{input.value='';input.focus();renderResults()};
+  renderResults();
+  setTimeout(()=>input.focus(),40);
+}
+
+function openPostponeModal(id){
+  const t=tasks.find(x=>x.id===id);
+  if(!t)return;
+  const tmr=dayKey(moveDay(now,1));
+  const afterTmr=dayKey(moveDay(now,2));
+  const back=document.createElement('div');
+  back.className='modal-back';
+  back.innerHTML='<div class="modal confirm-modal" role="dialog" aria-modal="true"><h2>연기</h2><p style="margin-bottom:8px">“<b>'+esc(t.title)+'</b>” 일정을 언제로 미룰까요?</p><div class="postpone-grid"><button type="button" class="postpone-choice" data-pick-date="'+tmr+'"><strong>내일</strong><small>'+fmt(new Date(tmr+'T00:00:00'),{month:'numeric',day:'numeric',weekday:'short'})+'</small></button><button type="button" class="postpone-choice" data-pick-date="'+afterTmr+'"><strong>모레</strong><small>'+fmt(new Date(afterTmr+'T00:00:00'),{month:'numeric',day:'numeric',weekday:'short'})+'</small></button></div><div class="actions"><button class="cancel" type="button" data-close>취소</button></div></div>';
+  document.body.appendChild(back);
+  back.onclick=e=>{if(e.target===back)back.remove()};
+  back.querySelector('[data-close]').onclick=()=>back.remove();
+  back.querySelectorAll('[data-pick-date]').forEach(btn=>{
+    btn.onclick=()=>{
+      const nextDate=btn.dataset.pickDate;
+      back.remove();
+      moveTaskToDate(id,nextDate);
+    };
+  });
+}
+
+function openTaskExpandModal(id){
+  const t=tasks.find(x=>x.id===id);
+  if(!t)return;
+  if(!Array.isArray(t.tags))t.tags=[];
+  if(!Array.isArray(t.subtasks))t.subtasks=[];
+  const back=document.createElement('div');
+  back.className='modal-back';
+
+  function renderExpandBody(){
+    const tagsHtml=userTags.length
+      ?'<div class="tag-picker">'+userTags.map(tg=>{
+          const active=t.tags.includes(tg.id)||t.tags.includes(tg.name);
+          return '<button type="button" class="tag-pick-btn'+(active?' active':'')+'" data-pick-tag="'+esc(tg.id)+'"><span class="tag-dot" style="background:'+esc(tg.color||'#2d7ff9')+'"></span>#'+esc(tg.name)+'</button>';
+        }).join('')+'</div>'
+      :'<div style="font-size:12.5px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:8px"><span>등록된 태그가 없어요.</span><button type="button" class="toggle-done-btn" data-open-tag-mgr>설정에서 태그 추가</button></div>';
+
+    const subsHtml=t.subtasks.length
+      ?'<div class="subtask-editor-list">'+t.subtasks.map(s=>'<div class="subtask-editor-row'+(s.done?' done':'')+'"><button type="button" class="subtask-mini-chk" data-exp-sub-toggle="'+esc(s.id)+'">'+(s.done?'✓':'')+'</button><span>'+esc(s.title)+'</span><button type="button" class="subtask-del-btn" data-exp-sub-del="'+esc(s.id)+'" aria-label="삭제">×</button></div>').join('')+'</div>'
+      :'<div style="font-size:12.5px;color:var(--muted);margin-bottom:8px">아직 하위 할 일이 없어요.</div>';
+
+    back.innerHTML='<div class="modal" role="dialog" aria-modal="true" style="max-height:88vh;overflow-y:auto"><h2>확장 · '+esc(t.title)+'</h2>'
+      +'<div class="expand-section"><div class="expand-sec-title">1. 형식 전환</div><button type="button" class="expand-note-btn'+(t.isNote?' active':'')+'" data-toggle-note><span>'+(t.isNote?'📝 노트 형식 사용 중 (클릭 시 할 일로 변환)':'📝 노트로 변환 (메모장 형식)')+'</span><span>'+(t.isNote?'해제':'변환')+'</span></button></div>'
+      +'<div class="expand-section"><div class="expand-sec-title">2. 태그 선택</div>'+tagsHtml+'</div>'
+      +'<div class="expand-section"><div class="expand-sec-title">3. 하위 할 일 (체크리스트)</div>'+subsHtml+'<div class="group-quick-add" style="margin-bottom:0"><input type="search" id="expSubInput" placeholder="세부 할 일 입력…" autocomplete="off"><button type="button" id="expSubAddBtn">추가</button></div></div>'
+      +'<div class="actions"><button class="save" type="button" data-close>완료</button></div></div>';
+
+    back.querySelector('[data-close]').onclick=()=>back.remove();
+    back.querySelector('[data-toggle-note]').onclick=()=>{
+      t.isNote=!t.isNote;
+      if(t.isNote)t.done=false;
+      t.localUpdated=new Date().toISOString();
+      persist();
+      render();
+      renderExpandBody();
+    };
+    const mgrBtn=back.querySelector('[data-open-tag-mgr]');
+    if(mgrBtn)mgrBtn.onclick=()=>{back.remove();openTagManagerModal(()=>openTaskExpandModal(id))};
+    back.querySelectorAll('[data-pick-tag]').forEach(btn=>{
+      btn.onclick=()=>{
+        const tid=btn.dataset.pickTag;
+        if(t.tags.includes(tid))t.tags=t.tags.filter(x=>x!==tid);
+        else t.tags.push(tid);
+        t.localUpdated=new Date().toISOString();
+        persist();
+        render();
+        renderExpandBody();
+      };
+    });
+    back.querySelectorAll('[data-exp-sub-toggle]').forEach(btn=>{
+      btn.onclick=()=>{
+        const sub=t.subtasks.find(s=>s.id===btn.dataset.expSubToggle);
+        if(!sub)return;
+        sub.done=!sub.done;
+        t.localUpdated=new Date().toISOString();
+        persist();
+        render();
+        renderExpandBody();
+      };
+    });
+    back.querySelectorAll('[data-exp-sub-del]').forEach(btn=>{
+      btn.onclick=()=>{
+        t.subtasks=t.subtasks.filter(s=>s.id!==btn.dataset.expSubDel);
+        t.localUpdated=new Date().toISOString();
+        persist();
+        render();
+        renderExpandBody();
+      };
+    });
+    const subInp=back.querySelector('#expSubInput');
+    const subAdd=back.querySelector('#expSubAddBtn');
+    const submitSub=()=>{
+      const val=subInp.value.trim();
+      if(!val)return;
+      t.subtasks.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:val,done:false});
+      t.localUpdated=new Date().toISOString();
+      persist();
+      render();
+      renderExpandBody();
+      back.querySelector('#expSubInput')?.focus();
+    };
+    subAdd.onclick=submitSub;
+    subInp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();submitSub()}};
+  }
+
+  document.body.appendChild(back);
+  back.onclick=e=>{if(e.target===back)back.remove()};
+  renderExpandBody();
+}
+
+function openTagManagerModal(onClosed){
+  const back=document.createElement('div');
+  back.className='modal-back';
+  let chosenColor=TAG_COLOR_PRESETS[0];
+
+  function renderTagMgr(){
+    const listHtml=userTags.length
+      ?userTags.map(tg=>'<div class="tag-manage-row"><span style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:650"><span class="tag-dot" style="background:'+esc(tg.color||'#2d7ff9')+'"></span>#'+esc(tg.name)+'</span><button type="button" class="subtask-del-btn" data-del-tag="'+esc(tg.id)+'" aria-label="삭제">×</button></div>').join('')
+      :'<div style="font-size:13px;color:var(--muted);padding:10px 2px">아직 등록된 태그가 없습니다. 아래에서 새 태그를 추가해 주세요.</div>';
+
+    back.innerHTML='<div class="modal account-modal" role="dialog" aria-modal="true" style="max-height:86vh;overflow-y:auto"><h2>태그 관리</h2><p>태그를 추가해 두면 할 일을 좌측으로 스와이프 → [확장]에서 바로 지정할 수 있어요.</p><div style="display:grid;gap:6px;margin-bottom:14px">'+listHtml+'</div><label for="newTagInput">새 태그 이름</label><input id="newTagInput" type="search" placeholder="예: 업무, 개인, 쇼핑" autocomplete="off"><div class="tag-color-dots">'+TAG_COLOR_PRESETS.map(c=>'<button type="button" class="tag-color-opt'+(c===chosenColor?' active':'')+'" data-tag-color="'+c+'" style="background:'+c+'" aria-label="색상 선택"></button>').join('')+'</div><div class="actions"><button class="cancel" type="button" data-close>닫기</button><button class="save" type="button" id="addTagBtn">태그 추가</button></div></div>';
+
+    const close=()=>{back.remove();if(onClosed)onClosed()};
+    back.querySelector('[data-close]').onclick=close;
+    back.onclick=e=>{if(e.target===back)close()};
+    back.querySelectorAll('[data-tag-color]').forEach(btn=>{
+      btn.onclick=()=>{
+        chosenColor=btn.dataset.tagColor;
+        back.querySelectorAll('[data-tag-color]').forEach(x=>x.classList.toggle('active',x===btn));
+      };
+    });
+    back.querySelectorAll('[data-del-tag]').forEach(btn=>{
+      btn.onclick=()=>{
+        const tid=btn.dataset.delTag;
+        userTags=userTags.filter(x=>x.id!==tid);
+        tasks.forEach(t=>{if(Array.isArray(t.tags))t.tags=t.tags.filter(x=>x!==tid)});
+        saveUserTags();
+        persist();
+        render();
+        renderTagMgr();
+      };
+    });
+    const inp=back.querySelector('#newTagInput');
+    const addBtn=back.querySelector('#addTagBtn');
+    const submitTag=()=>{
+      const name=inp.value.trim().replace(/^#+/,'');
+      if(!name)return;
+      if(userTags.some(x=>x.name.toLowerCase()===name.toLowerCase())){showNotice('이미 같은 이름의 태그가 있어요.');return}
+      userTags.push({id:'tag_'+Date.now().toString(36),name,color:chosenColor});
+      saveUserTags();
+      render();
+      renderTagMgr();
+      back.querySelector('#newTagInput')?.focus();
+    };
+    addBtn.onclick=submitTag;
+    inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();submitTag()}};
+  }
+
+  document.body.appendChild(back);
+  renderTagMgr();
+}
+
 function openSettingsModal(){
   const back=document.createElement('div');
   back.className='modal-back';
@@ -1180,11 +1562,13 @@ function openSettingsModal(){
   const gcalSub=isGcalOk?('실시간 연결됨 · '+calendarEvents.length+'개 일정'):(calendarEvents.length?('저장된 일정 '+calendarEvents.length+'개 (재연결 필요)'):'연결 안 됨');
   const gtaskSub=googleAccessToken?'연결됨':'연결 안 됨';
   const cloudSub=cloudUser?(cloudUser.email+' (연결됨)'):'로그인 안 됨 (기기 내 저장)';
+  const tagSub=userTags.length?('등록된 태그 '+userTags.length+'개'):'태그 추가 및 관리';
   const presets=[[0.85,'작게'],[0.92,'조금 작게'],[1,'기본'],[1.1,'조금 크게'],[1.2,'크게']];
-  back.innerHTML='<div class="modal account-modal" style="max-height:88vh;overflow-y:auto"><h2>설정</h2><div class="settings-list"><div class="settings-item"><div class="settings-item-info"><div class="settings-item-title">📅 Google 캘린더</div><div class="settings-item-sub">'+esc(gcalSub)+'</div></div><button type="button" class="settings-item-btn" data-set-gcal>설정</button></div><div class="settings-item"><div class="settings-item-info"><div class="settings-item-title">✓ Google Tasks</div><div class="settings-item-sub">'+esc(gtaskSub)+'</div></div><button type="button" class="settings-item-btn" data-set-gtask>설정</button></div><div class="settings-item"><div class="settings-item-info"><div class="settings-item-title">☁️ 기기 동기화</div><div class="settings-item-sub">'+esc(cloudSub)+'</div></div><button type="button" class="settings-item-btn" data-set-cloud>'+(cloudUser?'계정':'로그인')+'</button></div><div class="settings-item" style="display:block"><div class="settings-item-info" style="display:flex;justify-content:space-between;align-items:center"><div class="settings-item-title">🔤 화면 글자 크기</div><span style="font-size:12px;font-weight:700;color:var(--green)" id="fontScaleLabel">'+Math.round(fontScale*100)+'%</span></div><div class="font-scale-presets">'+presets.map(([v,lbl])=>'<button type="button" class="font-scale-btn'+(Math.abs(fontScale-v)<0.02?' active':'')+'" data-font-val="'+v+'">'+lbl+'</button>').join('')+'</div></div></div><div class="actions" style="margin-top:16px"><button class="cancel" type="button" data-close>닫기</button></div></div>';
+  back.innerHTML='<div class="modal account-modal" style="max-height:88vh;overflow-y:auto"><h2>설정</h2><div class="settings-list"><div class="settings-item"><div class="settings-item-info"><div class="settings-item-title">🏷️ 태그 관리</div><div class="settings-item-sub">'+esc(tagSub)+'</div></div><button type="button" class="settings-item-btn" data-set-tags>관리</button></div><div class="settings-item"><div class="settings-item-info"><div class="settings-item-title">📅 Google 캘린더</div><div class="settings-item-sub">'+esc(gcalSub)+'</div></div><button type="button" class="settings-item-btn" data-set-gcal>설정</button></div><div class="settings-item"><div class="settings-item-info"><div class="settings-item-title">✓ Google Tasks</div><div class="settings-item-sub">'+esc(gtaskSub)+'</div></div><button type="button" class="settings-item-btn" data-set-gtask>설정</button></div><div class="settings-item"><div class="settings-item-info"><div class="settings-item-title">☁️ 기기 동기화</div><div class="settings-item-sub">'+esc(cloudSub)+'</div></div><button type="button" class="settings-item-btn" data-set-cloud>'+(cloudUser?'계정':'로그인')+'</button></div><div class="settings-item" style="display:block"><div class="settings-item-info" style="display:flex;justify-content:space-between;align-items:center"><div class="settings-item-title">🔤 화면 글자 크기</div><span style="font-size:12px;font-weight:700;color:var(--green)" id="fontScaleLabel">'+Math.round(fontScale*100)+'%</span></div><div class="font-scale-presets">'+presets.map(([v,lbl])=>'<button type="button" class="font-scale-btn'+(Math.abs(fontScale-v)<0.02?' active':'')+'" data-font-val="'+v+'">'+lbl+'</button>').join('')+'</div></div></div><div class="actions" style="margin-top:16px"><button class="cancel" type="button" data-close>닫기</button></div></div>';
   document.body.appendChild(back);
   back.onclick=e=>{if(e.target===back)back.remove()};
   back.querySelector('[data-close]').onclick=()=>back.remove();
+  back.querySelector('[data-set-tags]').onclick=()=>{back.remove();openTagManagerModal()};
   back.querySelector('[data-set-gcal]').onclick=()=>{back.remove();googleCalendarModal()};
   back.querySelector('[data-set-gtask]').onclick=()=>{back.remove();googleModal()};
   back.querySelector('[data-set-cloud]').onclick=()=>{back.remove();openAccount()};
@@ -1227,6 +1611,10 @@ async function refreshCloudTasks(userId=cloudUser?.id,deferIfSaving=false,force=
     if(Array.isArray(calMeta.gcalSelectedIds)){
       gcalSelectedIds=calMeta.gcalSelectedIds;
       try{localStorage.setItem(GCAL_SELECTED_KEY,JSON.stringify(gcalSelectedIds))}catch(_){}
+    }
+    if(Array.isArray(calMeta.userTags)){
+      userTags=calMeta.userTags;
+      try{localStorage.setItem(USER_TAGS_KEY,JSON.stringify(userTags))}catch(_){}
     }
     if(calMeta.icalUrl1!==undefined)try{if(calMeta.icalUrl1)localStorage.setItem(ICAL_URL_KEY,calMeta.icalUrl1);else localStorage.removeItem(ICAL_URL_KEY)}catch(_){}
     if(calMeta.icalUrl2!==undefined)try{if(calMeta.icalUrl2)localStorage.setItem(ICAL_URL_2_KEY,calMeta.icalUrl2);else localStorage.removeItem(ICAL_URL_2_KEY)}catch(_){}
@@ -1337,10 +1725,11 @@ function setupPullToRefresh(){
   window.addEventListener('touchcancel',finishPull,{passive:true});
 }
 
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openQuickSearchModal()}});
 setInterval(pollCloud,5000);window.addEventListener('focus',()=>{if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});initCloud();setupPullToRefresh();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v62')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v63')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
