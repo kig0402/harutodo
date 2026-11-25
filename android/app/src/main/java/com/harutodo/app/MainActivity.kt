@@ -2,18 +2,22 @@ package com.harutodo.app
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Dialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Message
 import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
+import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -33,11 +37,31 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private var popupDialog: Dialog? = null
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private val appUrl = "https://kig0402.github.io/harutodo/"
 
     private val requestNotifPerm = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { _ -> }
+
+    private val fileChooserLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val callback = filePathCallback
+        filePathCallback = null
+        if (callback == null) return@registerForActivityResult
+        var results: Array<Uri>? = null
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val data = result.data!!
+            val clip = data.clipData
+            if (clip != null && clip.itemCount > 0) {
+                results = Array(clip.itemCount) { i -> clip.getItemAt(i).uri }
+            } else if (data.data != null) {
+                results = arrayOf(data.data!!)
+            }
+        }
+        callback.onReceiveValue(results)
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,6 +120,30 @@ class MainActivity : AppCompatActivity() {
         }
 
         webView.webChromeClient = object : WebChromeClient() {
+            override fun onShowFileChooser(
+                webView: WebView?,
+                filePathCallback: ValueCallback<Array<Uri>>?,
+                fileChooserParams: FileChooserParams?
+            ): Boolean {
+                this@MainActivity.filePathCallback?.onReceiveValue(null)
+                this@MainActivity.filePathCallback = filePathCallback
+                return try {
+                    val intent = fileChooserParams?.createIntent() ?: Intent(Intent.ACTION_GET_CONTENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "*/*"
+                    }
+                    if (fileChooserParams?.mode == FileChooserParams.MODE_OPEN_MULTIPLE) {
+                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                    }
+                    fileChooserLauncher.launch(intent)
+                    true
+                } catch (_: Exception) {
+                    this@MainActivity.filePathCallback = null
+                    filePathCallback?.onReceiveValue(null)
+                    false
+                }
+            }
+
             override fun onCreateWindow(
                 view: WebView?,
                 isDialog: Boolean,

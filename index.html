@@ -1632,7 +1632,7 @@ function openTaskExpandModal(id){
       +'<div class="expand-section"><div class="expand-sec-title">1. 형식 전환</div><button type="button" class="expand-note-btn'+(t.isNote?' active':'')+'" data-toggle-note><span>'+(t.isNote?'📝 노트 형식 사용 중 (클릭 시 할 일로 변환)':'📝 노트로 변환 (메모장 형식)')+'</span><span>'+(t.isNote?'해제':'변환')+'</span></button></div>'
       +'<div class="expand-section"><div class="expand-sec-title">2. 태그 선택</div>'+tagsHtml+'</div>'
       +'<div class="expand-section"><div class="expand-sec-title">3. 하위 할 일 (체크리스트)</div>'+subsHtml+'<div class="group-quick-add" style="margin-bottom:0"><input type="search" id="expSubInput" placeholder="세부 할 일 입력…" autocomplete="off"><button type="button" id="expSubAddBtn">추가</button></div></div>'
-      +'<div class="expand-section"><div class="expand-sec-title">4. 첨부파일 (사진 · 문서)</div>'+attsHtml+'<input type="file" id="expAttFileInput" multiple style="display:none"><button type="button" class="att-upload-btn" id="expAttPickBtn">📎 파일 또는 사진 첨부</button></div>'
+      +'<div class="expand-section"><div class="expand-sec-title">4. 첨부파일 (사진 · 문서)</div>'+attsHtml+'<input type="file" id="expAttFileInput" multiple style="position:fixed;left:-9999px;opacity:0;width:1px;height:1px"><label for="expAttFileInput" class="att-upload-btn" id="expAttPickBtn">📎 파일 또는 사진 첨부</label></div>'
       +'<div class="actions"><button class="save" type="button" data-close>완료</button></div></div>';
 
     const closeExpand=()=>{
@@ -1719,13 +1719,16 @@ function openTaskExpandModal(id){
     });
     const attInp=back.querySelector('#expAttFileInput');
     const attBtn=back.querySelector('#expAttPickBtn');
-    attBtn.onclick=()=>{
-      if(!cloudClient||!cloudUser){showNotice('먼저 설정 → 기기 동기화에서 로그인해 주세요.');return}
-      attInp.click();
+    attBtn.onclick=e=>{
+      if(!cloudClient||!cloudUser){
+        e.preventDefault();
+        showNotice('먼저 설정 → 기기 동기화에서 로그인해 주세요.');
+      }
     };
     attInp.onchange=async()=>{
       if(!attInp.files?.length)return;
-      attBtn.disabled=true;
+      attBtn.style.pointerEvents='none';
+      attBtn.style.opacity='.6';
       attBtn.textContent='⏳ 업로드 중…';
       await uploadTaskAttachments(t,attInp.files,()=>renderExpandBody());
     };
@@ -1962,7 +1965,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 setInterval(pollCloud,5000);window.addEventListener('focus',()=>{if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});initCloud();setupPullToRefresh();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v66')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v67')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
