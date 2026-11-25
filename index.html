@@ -160,7 +160,11 @@ const GOOGLE_OAUTH_CLIENT_ID='94815918526-tqndgocumj72bi3ksmqrd4kjni5r18b8.apps.
 let cloudClient=null,cloudUser=null,cloudReady=false,cloudTimer=null,lastCloudUpdatedAt='',cloudSaving=false,cloudRealtimeChannel=null,cloudRealtimeReady=false;
 let googleAccessToken='',googleTokenExpires=0,googleTaskListId='@default',googleSyncBusy=false,googleSyncTimer=null,googleRefreshPromise=null,googleSyncQueued=false;
 const GCAL_TOKEN_KEY='haru-gcal-token-v1';
+const GCAL_LIST_KEY='haru-gcal-list-v1';
+const GCAL_SELECTED_KEY='haru-gcal-selected-v1';
 let gcalAccessToken='',gcalTokenExpires=0,gcalTokenClient=null,gcalSyncBusy=false;
+let gcalCalendars=[];try{gcalCalendars=JSON.parse(localStorage.getItem(GCAL_LIST_KEY)||'[]')}catch(_){gcalCalendars=[]}
+let gcalSelectedIds=null;try{const s=localStorage.getItem(GCAL_SELECTED_KEY);if(s!==null)gcalSelectedIds=JSON.parse(s)}catch(_){gcalSelectedIds=null}
 try{const savedGcal=JSON.parse(localStorage.getItem(GCAL_TOKEN_KEY)||'null');if(savedGcal&&savedGcal.token&&savedGcal.expires>Date.now()){gcalAccessToken=savedGcal.token;gcalTokenExpires=savedGcal.expires}}catch(_){}
 const GOOGLE_DELETED_KEY='haru-google-deleted-v1';let googleDeleted=[];try{googleDeleted=JSON.parse(localStorage.getItem(GOOGLE_DELETED_KEY)||'[]')}catch(_){googleDeleted=[]}
 function to24(v){if(!v)return '';if(/^\d\d:\d\d$/.test(v))return v;const m=String(v).match(/(오전|오후)\s*(\d{1,2}):(\d{2})/);if(!m)return '';let h=Number(m[2])%12;if(m[1]==='오후')h+=12;return String(h).padStart(2,'0')+':'+m[3]}
@@ -251,7 +255,7 @@ function saveParsedCalendarEvents(allEv){
     const k=(e.date||'')+'|'+(e.time||'')+'|'+(e.title||'');
     if(seen.has(k))return false;
     seen.add(k);return true;
-  }).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'99:99').localeCompare(b.time||'99:99')).slice(0,800);
+  }).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'99:99').localeCompare(b.time||'99:99')).slice(0,1500);
   try{localStorage.setItem(ICAL_CACHE_KEY,JSON.stringify(calendarEvents))}catch(_){}
   if(cloudUser&&cloudReady)saveCloud();
   render();
@@ -305,41 +309,72 @@ async function fetchGoogleCalendarApi(manual=false){
   }
   gcalSyncBusy=true;
   try{
-    const calListRes=await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader',{headers:{Authorization:'Bearer '+gcalAccessToken}});
-    if(calListRes.status===401){
-      gcalAccessToken='';gcalTokenExpires=0;localStorage.removeItem(GCAL_TOKEN_KEY);
-      throw new Error('Google 캘린더 인증이 만료되었습니다. 다시 연결해 주세요.');
+    let rawCals=[],listPage='';
+    do{
+      const calListRes=await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=250'+(listPage?'&pageToken='+encodeURIComponent(listPage):''),{headers:{Authorization:'Bearer '+gcalAccessToken}});
+      if(calListRes.status===401){
+        gcalAccessToken='';gcalTokenExpires=0;localStorage.removeItem(GCAL_TOKEN_KEY);
+        throw new Error('Google 캘린더 인증이 만료되었습니다. 다시 연결해 주세요.');
+      }
+      const calListData=await calListRes.json().catch(()=>({}));
+      if(!calListRes.ok)throw new Error(calListData.error?.message||('Google Calendar API 오류 ('+calListRes.status+')'));
+      rawCals.push(...(calListData.items||[]));
+      listPage=calListData.nextPageToken||'';
+    }while(listPage);
+
+    gcalCalendars=rawCals.map(c=>({
+      id:c.id,
+      summary:c.summaryOverride||c.summary||c.id,
+      primary:Boolean(c.primary),
+      selected:c.selected!==false,
+      color:c.backgroundColor||'#1a73e8'
+    }));
+    try{localStorage.setItem(GCAL_LIST_KEY,JSON.stringify(gcalCalendars))}catch(_){}
+
+    let targetCals;
+    if(Array.isArray(gcalSelectedIds)){
+      targetCals=gcalCalendars.filter(c=>gcalSelectedIds.includes(c.id));
+    }else{
+      targetCals=gcalCalendars.filter(c=>c.selected!==false);
+      if(!targetCals.length)targetCals=gcalCalendars;
     }
-    const calListData=await calListRes.json().catch(()=>({}));
-    if(!calListRes.ok)throw new Error(calListData.error?.message||('Google Calendar API 오류 ('+calListRes.status+')'));
-    const cals=(calListData.items||[]).filter(c=>c.selected!==false);
-    const targetCals=cals.length?cals:[{id:'primary'}];
+    if(!targetCals.length)targetCals=[{id:'primary',summary:'기본 캘린더'}];
+
     const tMin=moveDay(new Date(),-30).toISOString();
     const tMax=moveDay(new Date(),120).toISOString();
     const allEv=[];
     for(const cal of targetCals){
-      const url='https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(cal.id)+'/events?singleEvents=true&orderBy=startTime&maxResults=250&timeMin='+encodeURIComponent(tMin)+'&timeMax='+encodeURIComponent(tMax);
-      const evRes=await fetch(url,{headers:{Authorization:'Bearer '+gcalAccessToken}});
-      if(!evRes.ok)continue;
-      const evData=await evRes.json().catch(()=>({}));
-      for(const item of (evData.items||[])){
-        if(item.status==='cancelled')continue;
-        const title=String(item.summary||'제목 없음').trim();
-        if(item.start?.date){
-          allEv.push({title,date:item.start.date,time:'',endTime:'',isAllDay:true});
-        }else if(item.start?.dateTime){
-          allEv.push({
-            title,
-            date:toLocalDayKeyFromIso(item.start.dateTime),
-            time:toLocalTimeFromIso(item.start.dateTime),
-            endTime:item.end?.dateTime?toLocalTimeFromIso(item.end.dateTime):'',
-            isAllDay:false
-          });
+      let evPage='';
+      do{
+        const url='https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(cal.id)+'/events?singleEvents=true&orderBy=startTime&maxResults=250&timeMin='+encodeURIComponent(tMin)+'&timeMax='+encodeURIComponent(tMax)+(evPage?'&pageToken='+encodeURIComponent(evPage):'');
+        const evRes=await fetch(url,{headers:{Authorization:'Bearer '+gcalAccessToken}});
+        if(!evRes.ok)break;
+        const evData=await evRes.json().catch(()=>({}));
+        for(const item of (evData.items||[])){
+          if(item.status==='cancelled')continue;
+          const title=String(item.summary||'제목 없음').trim();
+          if(item.start?.date){
+            const startD=new Date(item.start.date+'T00:00:00');
+            const endD=item.end?.date?new Date(item.end.date+'T00:00:00'):moveDay(startD,1);
+            const spanDays=Math.max(1,Math.min(14,Math.round((endD-startD)/86400000)));
+            for(let i=0;i<spanDays;i++){
+              allEv.push({title,date:dayKey(moveDay(startD,i)),time:'',endTime:'',isAllDay:true});
+            }
+          }else if(item.start?.dateTime){
+            allEv.push({
+              title,
+              date:toLocalDayKeyFromIso(item.start.dateTime),
+              time:toLocalTimeFromIso(item.start.dateTime),
+              endTime:item.end?.dateTime?toLocalTimeFromIso(item.end.dateTime):'',
+              isAllDay:false
+            });
+          }
         }
-      }
+        evPage=evData.nextPageToken||'';
+      }while(evPage);
     }
     const total=saveParsedCalendarEvents(allEv);
-    if(manual)showNotice('Google 캘린더에서 실시간 일정 '+total+'개를 가져왔어요.');
+    if(manual)showNotice('Google 캘린더 '+targetCals.length+'개에서 실시간 일정 '+total+'개를 가져왔어요.');
     return true;
   }catch(err){
     if(manual)showNotice(err.message||'Google 캘린더 일정을 가져오지 못했어요.');
@@ -460,10 +495,22 @@ function googleCalendarModal(){
   const back=document.createElement('div');
   back.className='modal-back';
   const isGcalConnected=Boolean(gcalAccessToken&&Date.now()<gcalTokenExpires);
-  back.innerHTML='<div class="modal account-modal" style="max-height:88vh;overflow-y:auto;padding-bottom:20px"><h2>Google Calendar 일정 연동</h2><div style="background:#eef4ff;border:1px solid #cfe0fc;border-radius:10px;padding:12px;margin:10px 0 14px;font-size:12.5px;line-height:1.6;color:#1e3a8a"><b>🔵 실시간 자동 동기화 (추천):</b><br>Google 계정을 연결하면 <b>.ics 파일 없이</b> 구글 캘린더 일정을 실시간으로 불러와 다른 기기와도 자동으로 공유합니다.<div style="display:flex;gap:8px;margin-top:10px"><button type="button" id="btnConnectGcal" style="flex:1;min-height:40px;border:none;background:#1a73e8;color:#fff;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer">'+(isGcalConnected?'🔄 구글 캘린더 지금 새로고침':'🔗 Google 캘린더 실시간 연결')+'</button>'+(isGcalConnected?'<button type="button" id="btnDisconnectGcal" style="min-height:40px;padding:0 12px;border:1px solid #cbd5e1;background:#fff;color:#475569;border-radius:9px;font-weight:600;font-size:12px;cursor:pointer">연결 해제</button>':'')+'</div></div><div style="border-top:1px dashed var(--line);margin:14px 0 12px;position:relative;text-align:center"><span style="background:#fff;padding:0 8px;font-size:11px;color:var(--muted);position:relative;top:-9px">또는 .ics 파일 / 비공개 iCal 주소로 등록</span></div><input type="file" id="icalFileInput" accept=".ics,text/calendar" multiple style="display:none"><button type="button" id="btnPickIcalFile" style="width:100%;min-height:38px;border:1px solid #d4e2cf;background:#f0f5ee;color:#2c4b37;border-radius:9px;font-weight:700;font-size:12.5px;cursor:pointer;margin-bottom:12px">📁 구글 캘린더 파일(.ics) 선택하여 등록</button><label for="icalUrl1">구글 캘린더 1 비공개 iCal 주소</label><input id="icalUrl1" type="url" placeholder="https://calendar.google.com/calendar/ical/.../basic.ics" value="'+esc(curUrl1)+'" style="font-size:12px;margin-bottom:10px"><label for="icalUrl2">구글 캘린더 2 비공개 iCal 주소 (선택)</label><input id="icalUrl2" type="url" placeholder="두 번째 구글 캘린더 비공개 주소" value="'+esc(curUrl2)+'" style="font-size:12px"><div class="auth-error" id="icalStatusMsg" role="status" style="margin-top:8px">'+(calendarEvents.length?'현재 총 '+calendarEvents.length+'개 일정이 표시 중입니다.':'등록된 일정이 없습니다.')+'</div><div class="actions" style="margin-top:14px"><button class="cancel" type="button" data-close>닫기</button>'+(curUrl1||curUrl2||calendarEvents.length?'<button class="danger" type="button" data-disconnect>일정 초기화</button><button class="cancel" type="button" data-refresh>새로고침</button>':'')+'<button class="save" type="button" data-save>주소 저장 및 동기화</button></div></div>';
+  const gcalListHtml=(isGcalConnected&&gcalCalendars.length)?'<div style="margin-top:10px;padding-top:8px;border-top:1px solid #d4e2fc"><div style="font-size:11.5px;font-weight:700;margin-bottom:6px;color:#1e40af">동기화할 캘린더 선택 ('+gcalCalendars.length+'개 발견):</div><div style="display:grid;gap:5px;max-height:140px;overflow-y:auto">'+gcalCalendars.map(c=>{const checked=Array.isArray(gcalSelectedIds)?gcalSelectedIds.includes(c.id):(c.selected!==false);return '<label style="display:flex;align-items:center;gap:7px;margin:0;font-size:12px;color:#1e293b;cursor:pointer"><input type="checkbox" class="gcal-cal-chk" value="'+esc(c.id)+'"'+(checked?' checked':'')+' style="width:15px;height:15px;margin:0"><span style="width:9px;height:9px;border-radius:50%;background:'+esc(c.color||'#1a73e8')+';flex:none"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.summary)+'</span></label>'}).join('')+'</div></div>':'';
+  back.innerHTML='<div class="modal account-modal" style="max-height:88vh;overflow-y:auto;padding-bottom:20px"><h2>Google Calendar 일정 연동</h2><div style="background:#eef4ff;border:1px solid #cfe0fc;border-radius:10px;padding:12px;margin:10px 0 14px;font-size:12.5px;line-height:1.6;color:#1e3a8a"><b>🔵 실시간 자동 동기화 (추천):</b><br>Google 계정을 연결하면 <b>.ics 파일 없이</b> 구글 캘린더 일정을 실시간으로 불러와 다른 기기와도 자동으로 공유합니다.<div style="display:flex;gap:8px;margin-top:10px"><button type="button" id="btnConnectGcal" style="flex:1;min-height:40px;border:none;background:#1a73e8;color:#fff;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer">'+(isGcalConnected?'🔄 구글 캘린더 지금 새로고침':'🔗 Google 캘린더 실시간 연결')+'</button>'+(isGcalConnected?'<button type="button" id="btnDisconnectGcal" style="min-height:40px;padding:0 12px;border:1px solid #cbd5e1;background:#fff;color:#475569;border-radius:9px;font-weight:600;font-size:12px;cursor:pointer">연결 해제</button>':'')+'</div>'+gcalListHtml+'</div><div style="border-top:1px dashed var(--line);margin:14px 0 12px;position:relative;text-align:center"><span style="background:#fff;padding:0 8px;font-size:11px;color:var(--muted);position:relative;top:-9px">또는 .ics 파일 / 비공개 iCal 주소로 등록</span></div><input type="file" id="icalFileInput" accept=".ics,text/calendar" multiple style="display:none"><button type="button" id="btnPickIcalFile" style="width:100%;min-height:38px;border:1px solid #d4e2cf;background:#f0f5ee;color:#2c4b37;border-radius:9px;font-weight:700;font-size:12.5px;cursor:pointer;margin-bottom:12px">📁 구글 캘린더 파일(.ics) 선택하여 등록</button><label for="icalUrl1">구글 캘린더 1 비공개 iCal 주소</label><input id="icalUrl1" type="url" placeholder="https://calendar.google.com/calendar/ical/.../basic.ics" value="'+esc(curUrl1)+'" style="font-size:12px;margin-bottom:10px"><label for="icalUrl2">구글 캘린더 2 비공개 iCal 주소 (선택)</label><input id="icalUrl2" type="url" placeholder="두 번째 구글 캘린더 비공개 주소" value="'+esc(curUrl2)+'" style="font-size:12px"><div class="auth-error" id="icalStatusMsg" role="status" style="margin-top:8px">'+(calendarEvents.length?'현재 총 '+calendarEvents.length+'개 일정이 표시 중입니다.':'등록된 일정이 없습니다.')+'</div><div class="actions" style="margin-top:14px"><button class="cancel" type="button" data-close>닫기</button>'+(curUrl1||curUrl2||calendarEvents.length?'<button class="danger" type="button" data-disconnect>일정 초기화</button><button class="cancel" type="button" data-refresh>새로고침</button>':'')+'<button class="save" type="button" data-save>주소 저장 및 동기화</button></div></div>';
   document.body.appendChild(back);
   back.onclick=e=>{if(e.target===back)back.remove()};
   back.querySelector('[data-close]').onclick=()=>back.remove();
+
+  back.querySelectorAll('.gcal-cal-chk').forEach(chk=>{
+    chk.onchange=async()=>{
+      const selected=Array.from(back.querySelectorAll('.gcal-cal-chk:checked')).map(el=>el.value);
+      gcalSelectedIds=selected;
+      try{localStorage.setItem(GCAL_SELECTED_KEY,JSON.stringify(selected))}catch(_){}
+      const st=back.querySelector('#icalStatusMsg');
+      if(st)st.textContent='선택한 캘린더 동기화 중…';
+      await fetchGoogleCalendarApi(true);
+    };
+  });
 
   const btnGcal=back.querySelector('#btnConnectGcal');
   if(btnGcal){
@@ -545,11 +592,12 @@ function calendarView(){
     const d=moveDay(start,i),key=dayKey(d);
     const items=tasks.filter(t=>t.date===key&&!t.done);
     const dayEvents=calendarEvents.filter(e=>e.date===key);
-    const evPills=dayEvents.slice(0,1).map(ev=>'<div class="cal-event-pill" title="'+esc(ev.title)+'">'+esc(ev.title)+'</div>').join('');
+    const evLimit=items.length===0?2:1;
+    const evPills=dayEvents.slice(0,evLimit).map(ev=>'<div class="cal-event-pill" title="'+esc(ev.title)+'">'+esc(ev.title)+'</div>').join('');
     const taskLimit=dayEvents.length>0?1:2;
     const taskItems=items.slice(0,taskLimit).map(t=>'<div class="cal-item '+(t.date<dayKey(now)&&!t.done?'late':'')+'" draggable="true" data-task-id="'+esc(t.id)+'">'+(isRecurringTask(t)?'↻ ':'')+esc(t.title)+'</div>').join('');
     const totalCount=items.length+dayEvents.length;
-    const shownCount=(dayEvents.length>0?1:0)+items.slice(0,taskLimit).length;
+    const shownCount=Math.min(dayEvents.length,evLimit)+items.slice(0,taskLimit).length;
     const rem=totalCount-shownCount;
     cells.push('<div class="cell '+(d.getMonth()!==month.getMonth()?'other ':'')+(key===dayKey(now)?'today ':'')+(key===selected?'selected':'')+'" data-day="'+key+'"><div class="day">'+d.getDate()+'</div>'+evPills+taskItems+(rem>0?'<div class="more">+'+rem+'개</div>':'')+'</div>');
   }
@@ -1015,7 +1063,7 @@ try{render();setInterval(reminders,15000);reminders()}catch(error){document.getE
 setInterval(pollCloud,5000);window.addEventListener('focus',()=>{if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});initCloud();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v45')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v46')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
