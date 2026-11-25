@@ -223,7 +223,7 @@ const ICAL_CACHE_KEY='haru-ical-events-cache-v1';
 let calendarEvents=[];
 try{calendarEvents=JSON.parse(localStorage.getItem(ICAL_CACHE_KEY)||'[]')}catch(_){calendarEvents=[]}
 
-const now=new Date();now.setHours(0,0,0,0);
+let now=new Date();now.setHours(0,0,0,0);
 const dayKey=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
 const moveDay=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
 const fmt=(d,opt)=>new Intl.DateTimeFormat('ko-KR',opt).format(d);
@@ -903,7 +903,26 @@ function render(){if(view==='calendar'&&!calScrollNeedSnap){const prevSw=documen
 }
 async function askNotice(){if(window.HaruNative&&typeof window.HaruNative.syncAlarms==='function')return true;if(!('Notification'in window))return false;if(Notification.permission==='granted')return true;if(Notification.permission==='denied'){showNotice('브라우저 설정에서 사이트 알림을 허용해 주세요.');return false}return await Notification.requestPermission()==='granted'}
 function showNotice(text){const n=document.createElement('div');n.className='notice';n.textContent=text;document.body.appendChild(n);setTimeout(()=>n.remove(),3500)}
-function reminders(){const d=new Date(),key=dayKey(d),time=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');tasks.forEach(t=>{if(!t.done&&t.date===key&&t.time===time&&t.notifiedAt!==key+' '+time){t.notifiedAt=key+' '+time;persist();showNotice('⏰ 할 일 시간이에요 · '+t.title);try{if('Notification'in window&&Notification.permission==='granted')new Notification('하루 · 할 일 시간이에요',{body:t.title});if(navigator.vibrate)navigator.vibrate([180,100,180])}catch(_){}}})}
+function syncCurrentDayIfChanged(){
+  const fresh=new Date();fresh.setHours(0,0,0,0);
+  if(dayKey(fresh)!==dayKey(now)){
+    const prevTodayKey=dayKey(now);
+    const prevMonthYm=now.getFullYear()+'-'+now.getMonth();
+    const curViewMonthYm=month.getFullYear()+'-'+month.getMonth();
+    now=fresh;
+    if(selected===prevTodayKey)selected=dayKey(now);
+    if(curViewMonthYm===prevMonthYm){
+      month=new Date(fresh.getFullYear(),fresh.getMonth(),1);
+      calScrollNeedSnap=true;
+    }
+    syncNativeAlarms();
+    if(!isUserTyping())render();
+    else pendingBackgroundRender=true;
+    return true;
+  }
+  return false;
+}
+function reminders(){syncCurrentDayIfChanged();const d=new Date(),key=dayKey(d),time=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');tasks.forEach(t=>{if(!t.done&&t.date===key&&t.time===time&&t.notifiedAt!==key+' '+time){t.notifiedAt=key+' '+time;persist();showNotice('⏰ 할 일 시간이에요 · '+t.title);try{if('Notification'in window&&Notification.permission==='granted')new Notification('하루 · 할 일 시간이에요',{body:t.title});if(navigator.vibrate)navigator.vibrate([180,100,180])}catch(_){}}})}
 function submitTask(form){const input=form.querySelector('input[name="task"]');if(!input)return;const p=parse(input.value,form.dataset.defaultDate||'');if(!p.title){input.focus();return}if(p.time)askNotice();const task={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),...p,done:false,notifiedAt:'',createdAt:Date.now(),localUpdated:new Date().toISOString()};tasks.unshift(task);if(task.date)selected=task.date;pendingBackgroundRender=false;const saved=persist();render();if(!saved)showNotice('이 브라우저에 저장할 수 없어요. 일반 브라우저 모드인지 확인해 주세요.')}
 function reopenDayPopup(date){selected=date;render();const cell=document.querySelector('[data-day="'+date+'"]');if(cell)showDayPopup(date,cell)}
 let suppressClickUntil=0;
@@ -1984,10 +2003,10 @@ function setupPullToRefresh(){
 }
 
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openQuickSearchModal()}});
-setInterval(pollCloud,5000);window.addEventListener('focus',()=>{if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});initCloud();setupPullToRefresh();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
+setInterval(pollCloud,5000);window.addEventListener('focus',()=>{syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}}});initCloud();setupPullToRefresh();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v69')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v70')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
