@@ -171,7 +171,8 @@ let gcalSelectedIds=null;try{const s=localStorage.getItem(GCAL_SELECTED_KEY);if(
 try{const savedGcal=JSON.parse(localStorage.getItem(GCAL_TOKEN_KEY)||'null');if(savedGcal&&savedGcal.token&&savedGcal.expires>Date.now()){gcalAccessToken=savedGcal.token;gcalTokenExpires=savedGcal.expires}}catch(_){}
 const GOOGLE_DELETED_KEY='haru-google-deleted-v1';let googleDeleted=[];try{googleDeleted=JSON.parse(localStorage.getItem(GOOGLE_DELETED_KEY)||'[]')}catch(_){googleDeleted=[]}
 function to24(v){if(!v)return '';if(/^\d\d:\d\d$/.test(v))return v;const m=String(v).match(/(오전|오후)\s*(\d{1,2}):(\d{2})/);if(!m)return '';let h=Number(m[2])%12;if(m[1]==='오후')h+=12;return String(h).padStart(2,'0')+':'+m[3]}
-function persist(){try{localStorage.setItem(STORE,JSON.stringify(tasks));hadLocalData=true;scheduleCloudSync();return true}catch(_){return false}}
+function syncNativeAlarms(){try{if(window.HaruNative&&typeof window.HaruNative.syncAlarms==='function'){const payload=tasks.filter(t=>!t.done&&t.date&&t.time).map(t=>({id:t.id,title:t.title,date:t.date,time:t.time}));window.HaruNative.syncAlarms(JSON.stringify(payload))}}catch(_){}}
+function persist(){try{localStorage.setItem(STORE,JSON.stringify(tasks));hadLocalData=true;syncNativeAlarms();scheduleCloudSync();return true}catch(_){return false}}
 function nav(k,label,ico){return '<button type="button" data-view="'+k+'" class="'+(view===k?'active':'')+'"><span class="ico">'+ico+'</span>'+label+'</button>'}
 function composer(defaultDate=''){return '<form class="composer" data-form autocomplete="off" role="search" data-default-date="'+esc(defaultDate)+'"><input type="search" name="task" aria-label="새 할 일" placeholder="할 일 · 내일 오전 10시 미팅" autocomplete="off" autocapitalize="sentences" autocorrect="off" spellcheck="false" inputmode="text" enterkeyhint="done" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other"><button class="add" type="button" data-add>추가</button></form>'}
 function getNextRepeatDate(dateStr,repeat){if(!repeat)return '';const today=new Date();today.setHours(0,0,0,0);const base=dateStr?new Date(dateStr+'T00:00:00'):new Date(today);if(isNaN(base.getTime()))return dayKey(moveDay(today,1));const origDay=base.getDate();if(repeat==='daily'){let next=new Date(base);next.setDate(next.getDate()+1);while(next<=today)next.setDate(next.getDate()+1);return dayKey(next)}if(repeat==='weekly'){let next=new Date(base);next.setDate(next.getDate()+7);while(next<=today)next.setDate(next.getDate()+7);return dayKey(next)}if(repeat==='monthly'){let y=base.getFullYear(),m=base.getMonth();while(true){m++;if(m>11){y+=Math.floor(m/12);m=m%12}const lastDay=new Date(y,m+1,0).getDate(),targetDay=Math.min(origDay,lastDay),cand=new Date(y,m,targetDay);if(cand>today&&cand>base)return dayKey(cand)}}if(repeat==='yearly'){let y=base.getFullYear(),m=base.getMonth();while(true){y++;const lastDay=new Date(y,m+1,0).getDate(),targetDay=Math.min(origDay,lastDay),cand=new Date(y,m,targetDay);if(cand>today&&cand>base)return dayKey(cand)}}return ''}
@@ -986,6 +987,7 @@ async function loadCloudTasks(user){
       await saveCloud();
     }else{
       tasks=cloudTasks;
+      syncNativeAlarms();
       try{localStorage.setItem(STORE,JSON.stringify(tasks));hadLocalData=true}catch(_){}
       if(calMeta){
         if(Array.isArray(calMeta.calendarEvents)&&(calMeta.calendarEvents.length>0||calendarEvents.length>0)){
@@ -1043,6 +1045,7 @@ async function refreshCloudTasks(userId=cloudUser?.id,deferIfSaving=false,force=
   const prevCalFp=JSON.stringify(calendarEvents||[]);
   const {tasks:cloudTasks,calMeta}=extractCloudData(data.tasks);
   tasks=mergeCloudTasks(cloudTasks);
+  syncNativeAlarms();
   lastCloudUpdatedAt=stamp;
   try{localStorage.setItem(STORE,JSON.stringify(tasks));hadLocalData=true}catch(_){}
   let calChanged=false;
@@ -1073,7 +1076,7 @@ const isPwaStandalone=()=>window.matchMedia('(display-mode: standalone)').matche
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredPwaInstallPrompt=event;const button=document.querySelector('[data-pwa-install]');if(button)button.hidden=false});
 window.addEventListener('appinstalled',()=>{deferredPwaInstallPrompt=null;const button=document.querySelector('[data-pwa-install]');if(button)button.hidden=true;showNotice('하루 앱을 설치했습니다.')});
 function ensurePwaInstallButton(){const actions=document.querySelector('.top-actions');if(!actions)return;let button=actions.querySelector('[data-pwa-install]');if(!button){button=document.createElement('button');button.type='button';button.className='account-btn';button.dataset.pwaInstall='';button.textContent='앱 설치';button.setAttribute('aria-label','하루 앱을 홈 화면에 설치');actions.insertBefore(button,actions.querySelector('[data-today]'))}const isIos=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);button.hidden=isPwaStandalone()||(!deferredPwaInstallPrompt&&!isIos);button.onclick=async()=>{if(deferredPwaInstallPrompt){const prompt=deferredPwaInstallPrompt;deferredPwaInstallPrompt=null;await prompt.prompt();const choice=await prompt.userChoice;showNotice(choice.outcome==='accepted'?'앱 설치를 진행합니다.':'앱 설치가 취소됐어요.');ensurePwaInstallButton();return}showNotice('브라우저 메뉴에서 “홈 화면에 추가”를 선택하세요.')}}
-try{render();setInterval(reminders,15000);reminders()}catch(error){document.getElementById('app').innerHTML='<main style="max-width:560px;margin:12vh auto;padding:24px;font:16px system-ui;color:#242620"><h1>화면을 불러오지 못했어요</h1><p>새로고침해 주세요. 문제가 계속되면 브라우저를 최신 버전으로 업데이트해 주세요.</p><button onclick="location.reload()" style="padding:12px 18px;background:#456b54;color:white;border:0;border-radius:8px">새로고침</button></main>';console.error(error)}
+try{render();syncNativeAlarms();setInterval(reminders,15000);reminders()}catch(error){document.getElementById('app').innerHTML='<main style="max-width:560px;margin:12vh auto;padding:24px;font:16px system-ui;color:#242620"><h1>화면을 불러오지 못했어요</h1><p>새로고침해 주세요. 문제가 계속되면 브라우저를 최신 버전으로 업데이트해 주세요.</p><button onclick="location.reload()" style="padding:12px 18px;background:#456b54;color:white;border:0;border-radius:8px">새로고침</button></main>';console.error(error)}
 async function triggerManualFullSync(){
   if(cloudUser&&cloudReady){
     await refreshCloudTasks(cloudUser.id,false,true);
@@ -1172,7 +1175,7 @@ function setupPullToRefresh(){
 setInterval(pollCloud,5000);window.addEventListener('focus',()=>{if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});initCloud();setupPullToRefresh();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v49')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v50')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
