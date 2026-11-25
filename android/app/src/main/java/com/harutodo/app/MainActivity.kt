@@ -161,6 +161,7 @@ class MainActivity : AppCompatActivity() {
         settings.setSupportMultipleWindows(true)
         settings.allowFileAccess = true
         settings.cacheMode = WebSettings.LOAD_DEFAULT
+        settings.textZoom = 100
         // Remove "; wv" marker so Google OAuth works cleanly inside the app
         settings.userAgentString = settings.userAgentString.replace("; wv", "")
     }
