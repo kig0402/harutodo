@@ -13,7 +13,10 @@
 <title>하루 · 오늘의 할 일</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-:root{color-scheme:light;--bg:#ffffff;--paper:#fff;--ink:#242620;--muted:#85877e;--line:#e9eae4;--green:#456b54;--soft:#e9efe9;--orange:#a9674c;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}*{box-sizing:border-box}html,body{margin:0;background:#ffffff;background-color:#ffffff;color:var(--ink);font-size:16px;-webkit-font-smoothing:antialiased}#app,.layout,.main,.side{background:#ffffff;background-color:#ffffff}button,input,textarea,select{font:inherit}button{cursor:pointer}input[type="search"]{-webkit-appearance:none;appearance:none}input[type="search"]::-webkit-search-decoration,input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-results-button,input[type="search"]::-webkit-search-results-decoration{display:none;-webkit-appearance:none}.layout{max-width:1100px;min-height:100dvh;margin:auto;display:grid;grid-template-columns:210px minmax(0,1fr);padding:0 28px}.side{border-right:1px solid var(--line);padding:32px 18px 26px 0;display:flex;flex-direction:column}.brand{font-size:21px;font-weight:800;letter-spacing:-1px;margin:0 0 48px;display:flex;align-items:center;gap:10px}.logo{width:34px;height:34px;border-radius:12px;background:var(--green);color:#fff;display:grid;place-items:center}.nav{display:grid;gap:6px}.nav button{border:0;background:transparent;text-align:left;color:var(--muted);height:44px;border-radius:11px;padding:0 13px;display:flex;align-items:center;gap:11px;font-size:14px}.nav button.active{background:var(--soft);color:var(--green);font-weight:700}.nav .ico{font-size:18px;width:21px;text-align:center}.note{margin-top:auto;padding:15px;border:1px solid var(--line);background:#fff;border-radius:12px;font-size:12px;line-height:1.7;color:var(--muted)}.main{width:100%;max-width:780px;margin:0 auto;padding:30px 0 50px 38px}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;color:var(--muted);font-size:13px}.top button,.round{height:38px;width:38px;border:1px solid var(--line);background:#fff;border-radius:50%;color:var(--muted)}.view{display:none}.view.active{display:block}.heading{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:21px}.eyebrow{margin:0 0 7px;color:var(--green);font-size:11px;font-weight:750;letter-spacing:1px}.heading h1{font-size:36px;letter-spacing:-1.7px;margin:0;line-height:1.15}.sub{margin:9px 0 0;color:var(--muted);font-size:13px}.score{text-align:right;min-width:90px;color:var(--muted);font-size:11px}.score b{color:var(--ink);font-size:22px}.composer{display:flex;align-items:center;gap:9px;padding:10px 11px;background:#fff;border:1px solid var(--line);border-radius:13px;margin:20px 0 7px}.composer:focus-within{border-color:#9bb19e}.composer input{min-width:0;flex:1;border:0;outline:0;font-size:14px}.composer input::placeholder{color:#aaa}.add{border:0;border-radius:8px;background:var(--green);color:#fff;padding:9px 13px;font-size:13px;font-weight:650}.hint{margin:0 3px 20px;font-size:11px;color:#999}.bar{display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px;color:#77796f;font-weight:700;font-size:12px}.bar small{font-weight:400;color:#999}.list{display:grid;gap:7px}.task{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;min-height:59px}.task.overdue .task-title{color:#d9483b;font-weight:600}.task.overdue .meta{color:#d9483b}.task.completed{opacity:.55}.check{width:21px;height:21px;border-radius:50%;background:#fff;border:1.5px solid #c9cdc5;flex:none;padding:0;color:white;font-size:13px}.completed .check{background:var(--green);border-color:var(--green)}.task-main{flex:1;min-width:0}.task-title{border:0;background:none;text-align:left;padding:0;font-size:15px;line-height:1.45;width:100%;overflow-wrap:anywhere;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.completed .task-title{text-decoration:line-through}.meta{font-size:12px;color:#96978f;margin-top:4px}.tag{display:inline-block;color:var(--green);background:var(--soft);border-radius:5px;padding:2px 6px;margin-left:5px;font-size:12px}.delete{border:0;background:none;color:#aaa;font-size:21px;padding:2px 6px}.empty{padding:26px 14px;text-align:center;color:var(--muted);border:1px dashed #dcded6;border-radius:12px;font-size:13px;line-height:1.8}.week{display:flex;justify-content:space-between;background:#fff;border:1px solid var(--line);padding:14px;border-radius:11px;margin:21px 0;color:var(--muted);font-size:13px}.week b{color:var(--ink)}.group-date{margin:19px 0 8px;color:var(--green);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px}.group-date-add{border:0;background:var(--green);color:#fff;border-radius:50%;width:26px;height:26px;font-size:19px;line-height:1;flex:none;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;opacity:.85}.group-date-add:hover{opacity:1}.group-quick-add{display:flex;align-items:center;gap:7px;padding:8px 10px;background:#f8f9f7;border:1px solid var(--line);border-radius:11px;margin-bottom:7px}.group-quick-add:focus-within{border-color:#9bb19e;background:#fff}.group-quick-add input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:14px;padding:2px 0}.group-quick-add input::placeholder{color:#aaa}.group-quick-add button{border:0;background:var(--green);color:#fff;border-radius:7px;padding:6px 11px;font-size:12px;font-weight:650;white-space:nowrap}.calendar-view{display:none;flex-direction:column}.calendar-view.active{display:flex;flex:1}.cal-head{display:flex;align-items:center;gap:12px;margin-top:0;margin-bottom:10px}.cal-head h2{font-size:22px;margin:0;letter-spacing:-.7px}.cal-head .spacer{flex:1}.cal-controls{display:flex;gap:6px}.cal-controls button{width:34px;height:34px;border:1px solid var(--line);background:#fff;border-radius:50%;font-size:19px;color:#777}.calendar{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 10px;display:flex;flex-direction:column;flex:1}.weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:minmax(105px,1fr);flex:1}.weekday{text-align:center;color:#999;font-size:13px;padding:6px 0 10px}.weekday:first-child{color:#bd8170}.cell{border-top:1px solid #f0f0ec;padding:6px 4px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column}.cell.selected{background:#f2f6f1;border-radius:5px}.day{width:25px;height:25px;display:grid;place-items:center;margin:0 auto 3px;border-radius:50%;font-size:13px}.cell.today .day{background:var(--green);color:#fff}.cell.other .day{color:#c5c5bd}.cal-item{font-size:11px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#eaf0ea;color:#4d6b51;border-radius:4px;padding:3px;margin-top:3px}.cal-item.late{background:#f7eee9;color:var(--orange)}.more{color:#777;font-size:10px;padding:2px}.selected-title{font-weight:700;font-size:13px;margin:20px 0 9px}.bottom{display:none}.modal-back{position:fixed;inset:0;background:#1d241e77;display:grid;place-items:center;padding:18px;z-index:50}.modal{width:min(100%,410px);max-height:calc(100dvh - 36px);overflow:auto;background:#fff;border-radius:16px;padding:20px;box-shadow:0 20px 70px #0002}.modal h2{margin:0 0 16px;font-size:19px}.modal label{display:block;margin:12px 0 5px;color:var(--muted);font-size:12px}.modal input,.modal textarea,.modal select{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;background:#ffffff}.modal textarea{min-height:96px;resize:vertical;line-height:1.5}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.actions button{border:0;border-radius:8px;padding:10px 14px;font-size:13px}.cancel{background:#f0f0ec}.save{background:var(--green);color:#fff}.danger{background:#d9483b;color:#fff}.confirm-modal p{font-size:14px;line-height:1.6;color:var(--ink);margin:0 0 16px}.notice{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#252923;color:white;padding:12px 15px;border-radius:10px;font-size:13px;z-index:15;box-shadow:0 6px 25px #0002}
+:root{color-scheme:light;--bg:#ffffff;--paper:#fff;--ink:#242620;--muted:#85877e;--line:#e9eae4;--green:#456b54;--soft:#e9efe9;--orange:#a9674c;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}*{box-sizing:border-box}html,body{margin:0;background:#ffffff;background-color:#ffffff;color:var(--ink);font-size:16px;-webkit-font-smoothing:antialiased;overscroll-behavior-y:contain}
+.pull-refresh-bar{position:fixed;top:0;left:0;right:0;z-index:45;display:flex;justify-content:center;pointer-events:none;transform:translateY(-64px);transition:transform .18s ease,opacity .18s ease;opacity:0}
+.pull-refresh-bar.visible{opacity:1}
+.pull-refresh-pill{margin-top:calc(12px + env(safe-area-inset-top));background:#252923;color:#fff;font-size:13px;font-weight:600;padding:8px 16px;border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.18);display:flex;align-items:center;gap:6px}#app,.layout,.main,.side{background:#ffffff;background-color:#ffffff}button,input,textarea,select{font:inherit}button{cursor:pointer}input[type="search"]{-webkit-appearance:none;appearance:none}input[type="search"]::-webkit-search-decoration,input[type="search"]::-webkit-search-cancel-button,input[type="search"]::-webkit-search-results-button,input[type="search"]::-webkit-search-results-decoration{display:none;-webkit-appearance:none}.layout{max-width:1100px;min-height:100dvh;margin:auto;display:grid;grid-template-columns:210px minmax(0,1fr);padding:0 28px}.side{border-right:1px solid var(--line);padding:32px 18px 26px 0;display:flex;flex-direction:column}.brand{font-size:21px;font-weight:800;letter-spacing:-1px;margin:0 0 48px;display:flex;align-items:center;gap:10px}.logo{width:34px;height:34px;border-radius:12px;background:var(--green);color:#fff;display:grid;place-items:center}.nav{display:grid;gap:6px}.nav button{border:0;background:transparent;text-align:left;color:var(--muted);height:44px;border-radius:11px;padding:0 13px;display:flex;align-items:center;gap:11px;font-size:14px}.nav button.active{background:var(--soft);color:var(--green);font-weight:700}.nav .ico{font-size:18px;width:21px;text-align:center}.note{margin-top:auto;padding:15px;border:1px solid var(--line);background:#fff;border-radius:12px;font-size:12px;line-height:1.7;color:var(--muted)}.main{width:100%;max-width:780px;margin:0 auto;padding:30px 0 50px 38px}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;color:var(--muted);font-size:13px}.top button,.round{height:38px;width:38px;border:1px solid var(--line);background:#fff;border-radius:50%;color:var(--muted)}.view{display:none}.view.active{display:block}.heading{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:21px}.eyebrow{margin:0 0 7px;color:var(--green);font-size:11px;font-weight:750;letter-spacing:1px}.heading h1{font-size:36px;letter-spacing:-1.7px;margin:0;line-height:1.15}.sub{margin:9px 0 0;color:var(--muted);font-size:13px}.score{text-align:right;min-width:90px;color:var(--muted);font-size:11px}.score b{color:var(--ink);font-size:22px}.composer{display:flex;align-items:center;gap:9px;padding:10px 11px;background:#fff;border:1px solid var(--line);border-radius:13px;margin:20px 0 7px}.composer:focus-within{border-color:#9bb19e}.composer input{min-width:0;flex:1;border:0;outline:0;font-size:14px}.composer input::placeholder{color:#aaa}.add{border:0;border-radius:8px;background:var(--green);color:#fff;padding:9px 13px;font-size:13px;font-weight:650}.hint{margin:0 3px 20px;font-size:11px;color:#999}.bar{display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px;color:#77796f;font-weight:700;font-size:12px}.bar small{font-weight:400;color:#999}.list{display:grid;gap:7px}.task{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;min-height:59px}.task.overdue .task-title{color:#d9483b;font-weight:600}.task.overdue .meta{color:#d9483b}.task.completed{opacity:.55}.check{width:21px;height:21px;border-radius:50%;background:#fff;border:1.5px solid #c9cdc5;flex:none;padding:0;color:white;font-size:13px}.completed .check{background:var(--green);border-color:var(--green)}.task-main{flex:1;min-width:0}.task-title{border:0;background:none;text-align:left;padding:0;font-size:15px;line-height:1.45;width:100%;overflow-wrap:anywhere;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.completed .task-title{text-decoration:line-through}.meta{font-size:12px;color:#96978f;margin-top:4px}.tag{display:inline-block;color:var(--green);background:var(--soft);border-radius:5px;padding:2px 6px;margin-left:5px;font-size:12px}.delete{border:0;background:none;color:#aaa;font-size:21px;padding:2px 6px}.empty{padding:26px 14px;text-align:center;color:var(--muted);border:1px dashed #dcded6;border-radius:12px;font-size:13px;line-height:1.8}.week{display:flex;justify-content:space-between;background:#fff;border:1px solid var(--line);padding:14px;border-radius:11px;margin:21px 0;color:var(--muted);font-size:13px}.week b{color:var(--ink)}.group-date{margin:19px 0 8px;color:var(--green);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px}.group-date-add{border:0;background:var(--green);color:#fff;border-radius:50%;width:26px;height:26px;font-size:19px;line-height:1;flex:none;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;opacity:.85}.group-date-add:hover{opacity:1}.group-quick-add{display:flex;align-items:center;gap:7px;padding:8px 10px;background:#f8f9f7;border:1px solid var(--line);border-radius:11px;margin-bottom:7px}.group-quick-add:focus-within{border-color:#9bb19e;background:#fff}.group-quick-add input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:14px;padding:2px 0}.group-quick-add input::placeholder{color:#aaa}.group-quick-add button{border:0;background:var(--green);color:#fff;border-radius:7px;padding:6px 11px;font-size:12px;font-weight:650;white-space:nowrap}.calendar-view{display:none;flex-direction:column}.calendar-view.active{display:flex;flex:1}.cal-head{display:flex;align-items:center;gap:12px;margin-top:0;margin-bottom:10px}.cal-head h2{font-size:22px;margin:0;letter-spacing:-.7px}.cal-head .spacer{flex:1}.cal-controls{display:flex;gap:6px}.cal-controls button{width:34px;height:34px;border:1px solid var(--line);background:#fff;border-radius:50%;font-size:19px;color:#777}.calendar{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 10px;display:flex;flex-direction:column;flex:1}.weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:minmax(105px,1fr);flex:1}.weekday{text-align:center;color:#999;font-size:13px;padding:6px 0 10px}.weekday:first-child{color:#bd8170}.cell{border-top:1px solid #f0f0ec;padding:6px 4px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column}.cell.selected{background:#f2f6f1;border-radius:5px}.day{width:25px;height:25px;display:grid;place-items:center;margin:0 auto 3px;border-radius:50%;font-size:13px}.cell.today .day{background:var(--green);color:#fff}.cell.other .day{color:#c5c5bd}.cal-item{font-size:11px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#eaf0ea;color:#4d6b51;border-radius:4px;padding:3px;margin-top:3px}.cal-item.late{background:#f7eee9;color:var(--orange)}.more{color:#777;font-size:10px;padding:2px}.selected-title{font-weight:700;font-size:13px;margin:20px 0 9px}.bottom{display:none}.modal-back{position:fixed;inset:0;background:#1d241e77;display:grid;place-items:center;padding:18px;z-index:50}.modal{width:min(100%,410px);max-height:calc(100dvh - 36px);overflow:auto;background:#fff;border-radius:16px;padding:20px;box-shadow:0 20px 70px #0002}.modal h2{margin:0 0 16px;font-size:19px}.modal label{display:block;margin:12px 0 5px;color:var(--muted);font-size:12px}.modal input,.modal textarea,.modal select{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;background:#ffffff}.modal textarea{min-height:96px;resize:vertical;line-height:1.5}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.actions button{border:0;border-radius:8px;padding:10px 14px;font-size:13px}.cancel{background:#f0f0ec}.save{background:var(--green);color:#fff}.danger{background:#d9483b;color:#fff}.confirm-modal p{font-size:14px;line-height:1.6;color:var(--ink);margin:0 0 16px}.notice{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#252923;color:white;padding:12px 15px;border-radius:10px;font-size:13px;z-index:15;box-shadow:0 6px 25px #0002}
 @media(max-width:680px){.layout{display:block;padding:0 18px}.side{display:none}.main{padding:23px 0 106px;max-width:none}.top{margin-bottom:30px}.heading h1{font-size:34px}.sub{font-size:12px}.bottom{position:fixed;z-index:5;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,1fr);padding:7px 12px calc(7px + env(safe-area-inset-bottom));background:#ffffff;border-top:1px solid var(--line)}.bottom button{border:0;background:none;border-radius:10px;height:54px;color:#85877e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px}.bottom button.active{color:var(--green);font-weight:700}.bottom .ico{font-size:19px}.calendar{margin-left:-5px;margin-right:-5px;padding:10px 6px}.cal-item{font-size:9px;padding:2px}.composer input{font-size:14px}.task{padding:11px 10px}.delete{padding:4px 5px}}
 /* Slightly larger type throughout, with extra room for small mobile text. */
 body{font-size:17px;font-weight:500}.brand{font-size:22px}.nav button{font-size:15px}.note{font-size:13px}.top{font-size:14px}.eyebrow{font-size:12px}.heading h1{font-size:38px}.sub{font-size:14px}.score{font-size:12px}.composer input{font-size:15px}.add{font-size:14px}.hint{font-size:12px}.bar{font-size:13px}.task-title{font-size:16px}.meta{font-size:13px}.empty{font-size:14px}.week{font-size:14px}.group-date{font-size:13px}.cal-head h2{font-size:23px}.weekday,.day{font-size:12px}.cal-item{font-size:12px}.more{font-size:11px}.selected-title{font-size:14px}.modal label{font-size:13px}.modal select{font-size:14px}.notice{font-size:14px}
@@ -947,6 +950,8 @@ async function saveCloud(){
     const calMeta={
       __meta:'haru_calendar_v1',
       calendarEvents:calendarEvents||[],
+      gcalCalendars:gcalCalendars||[],
+      gcalSelectedIds:gcalSelectedIds,
       icalUrl1:localStorage.getItem(ICAL_URL_KEY)||'',
       icalUrl2:localStorage.getItem(ICAL_URL_2_KEY)||''
     };
@@ -986,6 +991,14 @@ async function loadCloudTasks(user){
         if(Array.isArray(calMeta.calendarEvents)&&(calMeta.calendarEvents.length>0||calendarEvents.length>0)){
           calendarEvents=calMeta.calendarEvents;
           try{localStorage.setItem(ICAL_CACHE_KEY,JSON.stringify(calendarEvents))}catch(_){}
+        }
+        if(Array.isArray(calMeta.gcalCalendars)&&calMeta.gcalCalendars.length){
+          gcalCalendars=calMeta.gcalCalendars;
+          try{localStorage.setItem(GCAL_LIST_KEY,JSON.stringify(gcalCalendars))}catch(_){}
+        }
+        if(Array.isArray(calMeta.gcalSelectedIds)){
+          gcalSelectedIds=calMeta.gcalSelectedIds;
+          try{localStorage.setItem(GCAL_SELECTED_KEY,JSON.stringify(gcalSelectedIds))}catch(_){}
         }
         if(calMeta.icalUrl1!==undefined)try{if(calMeta.icalUrl1)localStorage.setItem(ICAL_URL_KEY,calMeta.icalUrl1);else localStorage.removeItem(ICAL_URL_KEY)}catch(_){}
         if(calMeta.icalUrl2!==undefined)try{if(calMeta.icalUrl2)localStorage.setItem(ICAL_URL_2_KEY,calMeta.icalUrl2);else localStorage.removeItem(ICAL_URL_2_KEY)}catch(_){}
@@ -1039,6 +1052,14 @@ async function refreshCloudTasks(userId=cloudUser?.id,deferIfSaving=false,force=
       try{localStorage.setItem(ICAL_CACHE_KEY,JSON.stringify(calendarEvents))}catch(_){}
       if(JSON.stringify(calendarEvents)!==prevCalFp)calChanged=true;
     }
+    if(Array.isArray(calMeta.gcalCalendars)&&calMeta.gcalCalendars.length){
+      gcalCalendars=calMeta.gcalCalendars;
+      try{localStorage.setItem(GCAL_LIST_KEY,JSON.stringify(gcalCalendars))}catch(_){}
+    }
+    if(Array.isArray(calMeta.gcalSelectedIds)){
+      gcalSelectedIds=calMeta.gcalSelectedIds;
+      try{localStorage.setItem(GCAL_SELECTED_KEY,JSON.stringify(gcalSelectedIds))}catch(_){}
+    }
     if(calMeta.icalUrl1!==undefined)try{if(calMeta.icalUrl1)localStorage.setItem(ICAL_URL_KEY,calMeta.icalUrl1);else localStorage.removeItem(ICAL_URL_KEY)}catch(_){}
     if(calMeta.icalUrl2!==undefined)try{if(calMeta.icalUrl2)localStorage.setItem(ICAL_URL_2_KEY,calMeta.icalUrl2);else localStorage.removeItem(ICAL_URL_2_KEY)}catch(_){}
   }
@@ -1053,10 +1074,105 @@ window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();def
 window.addEventListener('appinstalled',()=>{deferredPwaInstallPrompt=null;const button=document.querySelector('[data-pwa-install]');if(button)button.hidden=true;showNotice('하루 앱을 설치했습니다.')});
 function ensurePwaInstallButton(){const actions=document.querySelector('.top-actions');if(!actions)return;let button=actions.querySelector('[data-pwa-install]');if(!button){button=document.createElement('button');button.type='button';button.className='account-btn';button.dataset.pwaInstall='';button.textContent='앱 설치';button.setAttribute('aria-label','하루 앱을 홈 화면에 설치');actions.insertBefore(button,actions.querySelector('[data-today]'))}const isIos=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);button.hidden=isPwaStandalone()||(!deferredPwaInstallPrompt&&!isIos);button.onclick=async()=>{if(deferredPwaInstallPrompt){const prompt=deferredPwaInstallPrompt;deferredPwaInstallPrompt=null;await prompt.prompt();const choice=await prompt.userChoice;showNotice(choice.outcome==='accepted'?'앱 설치를 진행합니다.':'앱 설치가 취소됐어요.');ensurePwaInstallButton();return}showNotice('브라우저 메뉴에서 “홈 화면에 추가”를 선택하세요.')}}
 try{render();setInterval(reminders,15000);reminders()}catch(error){document.getElementById('app').innerHTML='<main style="max-width:560px;margin:12vh auto;padding:24px;font:16px system-ui;color:#242620"><h1>화면을 불러오지 못했어요</h1><p>새로고침해 주세요. 문제가 계속되면 브라우저를 최신 버전으로 업데이트해 주세요.</p><button onclick="location.reload()" style="padding:12px 18px;background:#456b54;color:white;border:0;border-radius:8px">새로고침</button></main>';console.error(error)}
-setInterval(pollCloud,5000);window.addEventListener('focus',()=>{if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});initCloud();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
+async function triggerManualFullSync(){
+  if(cloudUser&&cloudReady){
+    await refreshCloudTasks(cloudUser.id,false,true);
+  }
+  if(googleAccessToken){
+    await syncGoogleTasks(false);
+  }
+  if(gcalAccessToken&&Date.now()<gcalTokenExpires){
+    await fetchGoogleCalendarApi(true);
+  }else if(gcalCalendars.length>0||localStorage.getItem(GCAL_TOKEN_KEY)){
+    try{
+      await requestGcalToken('');
+      await fetchGoogleCalendarApi(true);
+    }catch(_){
+      showNotice(cloudUser?'클라우드 동기화 완료! (실시간 구글 캘린더 갱신은 상단 📅 캘린더에서 다시 연결해 주세요)':'구글 캘린더 연결이 만료되었어요. 상단 📅 캘린더에서 다시 연결해 주세요.');
+    }
+  }else{
+    showNotice(cloudUser?'최신 할 일과 일정을 불러왔어요. (구글 캘린더 직접 연동은 상단 📅 캘린더에서 연결)':'상단 📅 캘린더에서 Google 캘린더를 연결하면 일정을 실시간 동기화할 수 있어요.');
+  }
+}
+
+function setupPullToRefresh(){
+  let bar=document.querySelector('.pull-refresh-bar');
+  if(!bar){
+    bar=document.createElement('div');
+    bar.className='pull-refresh-bar';
+    bar.innerHTML='<div class="pull-refresh-pill">↓ 아래로 당겨서 동기화</div>';
+    document.body.appendChild(bar);
+  }
+  const pill=bar.querySelector('.pull-refresh-pill');
+  let startY=0,startX=0,pulling=false,ready=false,busy=false;
+
+  window.addEventListener('touchstart',e=>{
+    if(busy||e.touches.length!==1)return;
+    if(view!=='today'&&view!=='next')return;
+    if(document.querySelector('.modal-back,.day-popover-back,.task-touch-dragging'))return;
+    const main=document.querySelector('.main');
+    const atTop=(window.scrollY<=2)&&(!main||main.scrollTop<=2);
+    if(!atTop)return;
+    startY=e.touches[0].clientY;
+    startX=e.touches[0].clientX;
+    pulling=false;ready=false;
+  },{passive:true});
+
+  window.addEventListener('touchmove',e=>{
+    if(busy||!startY||e.touches.length!==1)return;
+    if(document.querySelector('.task-touch-dragging,.modal-back,.day-popover-back')){
+      startY=0;pulling=false;ready=false;bar.classList.remove('visible');bar.style.transform='translateY(-64px)';return;
+    }
+    const dy=e.touches[0].clientY-startY;
+    const dx=e.touches[0].clientX-startX;
+    if(!pulling){
+      if(dy>14&&Math.abs(dy)>Math.abs(dx)*1.3){
+        const main=document.querySelector('.main');
+        const atTop=(window.scrollY<=2)&&(!main||main.scrollTop<=2);
+        if(!atTop){startY=0;return}
+        pulling=true;
+      }else if(dy<-10||Math.abs(dx)>18){
+        startY=0;return;
+      }
+    }
+    if(pulling){
+      const offset=Math.min(72,dy*0.45);
+      bar.classList.add('visible');
+      bar.style.transform='translateY('+(offset-52)+'px)';
+      ready=dy>=75;
+      pill.textContent=ready?'↻ 놓으면 구글 캘린더 · 할 일 동기화':'↓ 아래로 당겨서 동기화';
+    }
+  },{passive:true});
+
+  async function finishPull(){
+    if(!startY)return;
+    startY=0;
+    if(pulling&&ready&&!busy){
+      busy=true;
+      pulling=false;ready=false;
+      bar.classList.add('visible');
+      bar.style.transform='translateY(4px)';
+      pill.textContent='⏳ 구글 캘린더 · 할 일 동기화 중…';
+      try{await triggerManualFullSync()}catch(_){}
+      setTimeout(()=>{
+        bar.classList.remove('visible');
+        bar.style.transform='translateY(-64px)';
+        busy=false;
+      },350);
+    }else{
+      pulling=false;ready=false;
+      bar.classList.remove('visible');
+      bar.style.transform='translateY(-64px)';
+    }
+  }
+  window.addEventListener('touchend',finishPull,{passive:true});
+  window.addEventListener('touchcancel',finishPull,{passive:true});
+}
+
+setInterval(pollCloud,5000);window.addEventListener('focus',()=>{if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});initCloud();setupPullToRefresh();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v48')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v49')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
