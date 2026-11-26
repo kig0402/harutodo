@@ -1,4 +1,4 @@
-const CACHE = 'haru-mobile-v77';
+const CACHE = 'haru-mobile-v78';
 const APP_ROOT = new URL('./', self.registration.scope);
 const CORE = ['', 'index.html', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png']
   .map(path => new URL(path, APP_ROOT).href);
