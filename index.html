@@ -934,6 +934,7 @@ function render(){if(view==='calendar'&&!calScrollNeedSnap){const prevSw=documen
   const t=tasks.find(x=>x.id===id);
   if(!t)return;
   if(!Array.isArray(t.tags))t.tags=[];
+  let listEditOpen=false;
   const back=document.createElement('div');
   back.className='modal-back';
   document.body.appendChild(back);
@@ -945,12 +946,24 @@ function render(){if(view==='calendar'&&!calScrollNeedSnap){const prevSw=documen
     const overdue=!t.done&&!t.isNote&&t.date&&t.date<dayKey(now);
     const dateLabel=t.date?fmt(new Date(t.date+'T00:00:00'),{year:'numeric',month:'long',day:'numeric',weekday:'short'}):'날짜 없음';
     const rep=repeatLabel(t);
+    const availLists=googleTaskLists.length?googleTaskLists:[{id:'__default__',title:'기본 목록',isDefault:true}];
+    const curList=availLists.find(l=>l.id===t.googleListId||(!t.googleListId&&l.isDefault))||availLists[0];
+    const curListIcon=getListIcon(curList);
     const chips=[];
     chips.push('<span class="task-info-chip'+(overdue?' late':'')+'" data-tap-edit="date">📅 '+esc(dateLabel)+(overdue?' · 미완료':'')+'</span>');
     chips.push('<span class="task-info-chip" data-tap-edit="time">⏰ '+(t.time?esc(t.time):'시간 없음')+'</span>');
     if(rep)chips.push('<span class="task-info-chip" data-tap-edit="repeat">'+esc(rep)+'</span>');
     else chips.push('<span class="task-info-chip" data-tap-edit="repeat">↻ 반복 없음</span>');
+    chips.push('<span class="task-info-chip" data-info-list-edit title="눌러서 목록 변경">'+curListIcon+' '+esc(curList.title)+'</span>');
     if(t.isNote)chips.push('<span class="task-info-chip" style="background:#fef3c7;color:#a16207">📝 노트</span>');
+    let listSectionHtml='';
+    if(listEditOpen){
+      const listBtns=availLists.map(lst=>{
+        const act=lst.id===curList.id;
+        return '<button type="button" class="tag-pick-btn'+(act?' active':'')+'" data-info-pick-list="'+esc(lst.id)+'"><span>'+getListIcon(lst)+'</span><span>'+esc(lst.title)+'</span></button>';
+      }).join('');
+      listSectionHtml='<div class="info-tag-picker-wrap"><div class="tag-picker">'+listBtns+'</div><div style="display:flex;justify-content:flex-end;margin-top:8px"><button type="button" class="toggle-done-btn" data-info-list-done>닫기</button></div></div>';
+    }
     const descHtml=t.description?'<div class="task-info-desc" data-tap-edit="description">'+esc(t.description)+'</div>':'<div class="task-info-desc empty-desc" data-tap-edit="description">설명 추가…</div>';
     const subsHtml=renderSubtasksPreview(t);
     const attsHtml=renderAttachmentsPreview(t);
@@ -967,7 +980,7 @@ function render(){if(view==='calendar'&&!calScrollNeedSnap){const prevSw=documen
       tagsSectionHtml='<div class="info-tags-row"><button type="button" class="info-tag-add-btn" data-info-tag-edit>+ 태그 추가</button></div>';
     }
 
-    back.innerHTML='<div class="modal" role="dialog" aria-modal="true"><div class="task-info-head"><button type="button" class="info-star-btn'+(t.starred?' active':'')+'" data-info-star aria-label="중요 별표">'+starSvg+'</button><div class="task-info-title'+(t.done?' done':'')+'" data-tap-edit="title">'+esc(t.title)+'</div></div><div class="task-info-meta">'+chips.join('')+'</div>'+tagsSectionHtml+descHtml+(subsHtml?'<div style="margin-bottom:10px">'+subsHtml+'</div>':'')+(attsHtml?'<div style="margin-bottom:10px">'+attsHtml+'</div>':'')+'<div class="actions"><button class="cancel" type="button" data-close>닫기</button></div></div>';
+    back.innerHTML='<div class="modal" role="dialog" aria-modal="true"><div class="task-info-head"><button type="button" class="info-star-btn'+(t.starred?' active':'')+'" data-info-star aria-label="중요 별표">'+starSvg+'</button><div class="task-info-title'+(t.done?' done':'')+'" data-tap-edit="title">'+esc(t.title)+'</div></div><div class="task-info-meta">'+chips.join('')+'</div>'+listSectionHtml+tagsSectionHtml+descHtml+(subsHtml?'<div style="margin-bottom:10px">'+subsHtml+'</div>':'')+(attsHtml?'<div style="margin-bottom:10px">'+attsHtml+'</div>':'')+'<div class="actions"><button class="cancel" type="button" data-close>닫기</button></div></div>';
 
     back.onclick=e=>{if(e.target===back)back.remove()};
     back.querySelector('[data-close]').onclick=()=>back.remove();
@@ -980,11 +993,46 @@ function render(){if(view==='calendar'&&!calScrollNeedSnap){const prevSw=documen
       render();
       renderInfoBody();
     };
+    const listEditBtn=back.querySelector('[data-info-list-edit]');
+    if(listEditBtn){
+      listEditBtn.onclick=()=>{
+        listEditOpen=!listEditOpen;
+        if(listEditOpen)tagEditOpen=false;
+        renderInfoBody();
+      };
+    }
+    const listDoneBtn=back.querySelector('[data-info-list-done]');
+    if(listDoneBtn)listDoneBtn.onclick=()=>{listEditOpen=false;renderInfoBody()};
+    back.querySelectorAll('[data-info-pick-list]').forEach(btn=>{
+      btn.onclick=()=>{
+        const newId=btn.dataset.infoPickList;
+        if(newId&&newId!==curList.id){
+          const picked=availLists.find(l=>l.id===newId);
+          if(t.googleTaskId&&!googleDeleted.includes(t.googleTaskId)){
+            googleDeleted.push(t.googleTaskId);
+            try{localStorage.setItem(GOOGLE_DELETED_KEY,JSON.stringify(googleDeleted))}catch(_){}
+            t.googleTaskId='';
+            t.googleUpdated='';
+            t.googleSnapshot='';
+          }
+          t.googleListId=newId==='__default__'?'':newId;
+          t.localUpdated=new Date().toISOString();
+          persist();
+          if(cloudUser&&cloudReady)saveCloud();
+          if(googleAccessToken)syncGoogleTasks(false);
+          render();
+          if(picked)showNotice('“'+picked.title+'” 목록으로 이동했어요.');
+        }
+        listEditOpen=false;
+        renderInfoBody();
+      };
+    });
     const tagEditTrigger=back.querySelector('[data-info-tag-edit]');
     if(tagEditTrigger){
       tagEditTrigger.onclick=()=>{
         if(!userTags.length){back.remove();openTagManagerModal(()=>viewTask(id,true));return}
         tagEditOpen=true;
+        listEditOpen=false;
         renderInfoBody();
       };
     }
@@ -1634,7 +1682,7 @@ function repeatFromNotes(notes){const m=String(notes||'').match(/\[\[haru-repeat
 function notesForTask(t){const markers=[markerFor(t.id),repeatMarker(t.repeat),extMarker(t)].filter(Boolean).join(' ');return [markers,String(t.description||'').trim()].filter(Boolean).join('\n\n')}
 function descriptionFromNotes(notes){return String(notes||'').replace(/\[\[haru-task:[^\]]+\]\]/g,'').replace(/\[\[haru-repeat:[^\]]+\]\]/g,'').replace(/\[\[haru-ext:[^\]]+\]\]/g,'').trim()}
 function markerId(notes){const m=String(notes||'').match(/\[\[haru-task:([^\]]+)\]\]/);return m?m[1]:''}
-async function syncGoogleTasks(manual=false){if(googleSyncBusy){googleSyncQueued=true;return false;}if(!googleAccessToken||Date.now()>=googleTokenExpires){try{if(!await renewGoogleAccessToken()){updateSyncStatus('Google 재연결 필요');if(manual)showNotice('Google 연결을 다시 해 주세요.');return false}}catch(error){updateSyncStatus('Google 연결 오류');if(manual)showNotice(error.message||'Google Tasks 연결을 갱신하지 못했어요.');return false}}googleSyncBusy=true;updateSyncStatus('Google 동기화 중…');try{const prevFp=taskFingerprint(tasks);const prevListsFp=JSON.stringify(googleTaskLists||[]);let list=await googleApi('users/@me/lists?maxResults=100');const allLists=list.items||[];if(!allLists.length)throw new Error('Google Tasks 목록을 찾지 못했어요.');googleTaskLists=allLists.map((l,idx)=>({id:l.id,title:l.title||'기본 목록',isDefault:idx===0}));try{localStorage.setItem(GOOGLE_LISTS_KEY,JSON.stringify(googleTaskLists))}catch(_){}googleTaskListId=googleTaskLists[0].id;const allByGoogle=new Map();const linkedRemote=new Set();for(const taskList of allLists){let remotes=[],page='';do{const pageData=await googleApi('lists/'+encodeURIComponent(taskList.id)+'/tasks?maxResults=100&showCompleted=true&showDeleted=true&showHidden=true'+(page?'&pageToken='+encodeURIComponent(page):''));remotes.push(...(pageData.items||[]));page=pageData.nextPageToken||''}while(page);for(const r of remotes)allByGoogle.set(r.id,r);for(const id of googleDeleted.slice()){const remote=remotes.find(r=>r.id===id);if(remote&&!remote.deleted)await googleApi('lists/'+encodeURIComponent(taskList.id)+'/tasks/'+encodeURIComponent(remote.id),{method:'DELETE'});if(remote)googleDeleted=googleDeleted.filter(x=>x!==id)}for(const remote of remotes){if(remote.deleted)continue;let t=tasks.find(x=>x.googleTaskId===remote.id)||tasks.find(x=>markerId(remote.notes)===x.id);if(!t){const ext=extFromNotes(remote.notes);t={id:markerId(remote.notes)||('g'+remote.id),title:remote.title||'할 일',description:descriptionFromNotes(remote.notes),date:googleDueDate(remote.due),time:'',repeat:repeatFromNotes(remote.notes),done:remote.status==='completed',starred:ext?ext.starred:false,isNote:ext?ext.isNote:false,tags:ext?ext.tags:[],subtasks:ext?ext.subtasks:[],attachments:ext?ext.attachments:[],notifiedAt:'',createdAt:Date.now(),googleTaskId:remote.id,googleListId:taskList.id,googleUpdated:remote.updated||'',googleSnapshot:''};tasks.push(t);t.googleSnapshot=googleSnapshot(t);t.googleUpdated=remote.updated||'';linkedRemote.add(remote.id);continue}t.googleTaskId=remote.id;t.googleListId=taskList.id;let snap=t.googleSnapshot||'';const legacySnap=JSON.stringify({title:t.title,date:t.date||'',done:!!t.done}),legacySnap2=JSON.stringify({title:t.title,description:t.description||'',date:t.date||'',done:!!t.done});if(!snap||snap===legacySnap||snap===legacySnap2){t.description=descriptionFromNotes(remote.notes);const rep=repeatFromNotes(remote.notes);if(rep||!t.repeat)t.repeat=rep;const ext=extFromNotes(remote.notes);if(ext){if(ext.starred)t.starred=true;if(ext.isNote)t.isNote=true;if(ext.tags.length&&(!t.tags||!t.tags.length))t.tags=ext.tags;if(ext.subtasks.length&&(!t.subtasks||!t.subtasks.length))t.subtasks=ext.subtasks;if(ext.attachments.length&&(!t.attachments||!t.attachments.length))t.attachments=ext.attachments}if(snap){t.googleSnapshot=googleSnapshot(t);snap=t.googleSnapshot}}const isLocalNewer=t.localUpdated&&(!t.googleUpdated||Date.parse(t.localUpdated)>Date.parse(t.googleUpdated));const localChanged=(snap&&googleSnapshot(t)!==snap)||isLocalNewer;const remoteChanged=snap&&String(remote.updated||'')!==String(t.googleUpdated||'')&&!isLocalNewer;if(localChanged){const patch={title:t.title,notes:notesForTask(t),status:t.done?'completed':'needsAction'};if(t.date)patch.due=t.date+'T00:00:00.000Z';else patch.due=null;const updated=await googleApi('lists/'+encodeURIComponent(taskList.id)+'/tasks/'+encodeURIComponent(remote.id),{method:'PATCH',body:JSON.stringify(patch)});remote.updated=updated.updated||new Date().toISOString();t.googleUpdated=remote.updated}else if(remoteChanged){t.title=remote.title||t.title;t.description=descriptionFromNotes(remote.notes);const rep=repeatFromNotes(remote.notes);if(rep)t.repeat=rep;const ext=extFromNotes(remote.notes);if(ext){t.starred=ext.starred;t.isNote=ext.isNote;t.tags=ext.tags;t.subtasks=ext.subtasks;t.attachments=ext.attachments}t.date=googleDueDate(remote.due);t.done=remote.status==='completed'}t.googleUpdated=remote.updated||t.googleUpdated||'';t.googleSnapshot=googleSnapshot(t);linkedRemote.add(remote.id)}for(const t of tasks){if(t.googleTaskId&&linkedRemote.has(t.googleTaskId))continue;if(t.googleTaskId)continue;const targetListForTask=t.googleListId||googleTaskListId;if(targetListForTask!==taskList.id)continue;const remote=remotes.find(r=>!r.deleted&&markerId(r.notes)===t.id);if(remote){t.googleTaskId=remote.id;t.googleListId=taskList.id;t.description=descriptionFromNotes(remote.notes);const rep=repeatFromNotes(remote.notes);if(rep)t.repeat=rep;t.googleUpdated=remote.updated||'';t.googleSnapshot=googleSnapshot(t);linkedRemote.add(remote.id);continue}const body={title:t.title,notes:notesForTask(t),status:t.done?'completed':'needsAction'};if(t.date)body.due=t.date+'T00:00:00.000Z';const created=await googleApi('lists/'+encodeURIComponent(taskList.id)+'/tasks',{method:'POST',body:JSON.stringify(body)});t.googleTaskId=created.id;t.googleListId=taskList.id;t.googleUpdated=created.updated||'';t.googleSnapshot=googleSnapshot(t);linkedRemote.add(created.id)}}localStorage.setItem(GOOGLE_DELETED_KEY,JSON.stringify(googleDeleted));tasks=tasks.filter(t=>!t.googleTaskId||allByGoogle.get(t.googleTaskId)?.deleted!==true);const nextFp=taskFingerprint(tasks);const tasksChanged=prevFp!==nextFp||prevListsFp!==JSON.stringify(googleTaskLists||[]);try{localStorage.setItem(STORE,JSON.stringify(tasks));hadLocalData=true}catch(_){}if(cloudUser&&tasksChanged)scheduleCloudSync();updateSyncStatus('Google 동기화됨');if(tasksChanged)requestBackgroundRender();if(manual)showNotice('Google Tasks '+googleTaskLists.length+'개 목록과 동기화했습니다.');return true}catch(error){updateSyncStatus('Google 연결 오류');if(manual)showNotice(error.message||'Google Tasks 동기화에 실패했어요.');return false}finally{googleSyncBusy=false;if(googleSyncQueued){googleSyncQueued=false;setTimeout(()=>syncGoogleTasks(false),200);}}}
+async function syncGoogleTasks(manual=false){if(googleSyncBusy){googleSyncQueued=true;return false;}if(!googleAccessToken||Date.now()>=googleTokenExpires){try{if(!await renewGoogleAccessToken()){updateSyncStatus('Google 재연결 필요');if(manual)showNotice('Google 연결을 다시 해 주세요.');return false}}catch(error){updateSyncStatus('Google 연결 오류');if(manual)showNotice(error.message||'Google Tasks 연결을 갱신하지 못했어요.');return false}}googleSyncBusy=true;updateSyncStatus('Google 동기화 중…');try{const prevFp=taskFingerprint(tasks);const prevListsFp=JSON.stringify(googleTaskLists||[]);let list=await googleApi('users/@me/lists?maxResults=100');const allLists=list.items||[];if(!allLists.length)throw new Error('Google Tasks 목록을 찾지 못했어요.');googleTaskLists=allLists.map((l,idx)=>({id:l.id,title:l.title||'기본 목록',isDefault:idx===0}));try{localStorage.setItem(GOOGLE_LISTS_KEY,JSON.stringify(googleTaskLists))}catch(_){}googleTaskListId=googleTaskLists[0].id;const allByGoogle=new Map();const linkedRemote=new Set();for(const taskList of allLists){let remotes=[],page='';do{const pageData=await googleApi('lists/'+encodeURIComponent(taskList.id)+'/tasks?maxResults=100&showCompleted=true&showDeleted=true&showHidden=true'+(page?'&pageToken='+encodeURIComponent(page):''));remotes.push(...(pageData.items||[]));page=pageData.nextPageToken||''}while(page);for(const r of remotes)allByGoogle.set(r.id,r);for(const id of googleDeleted.slice()){const remote=remotes.find(r=>r.id===id);if(remote&&!remote.deleted){await googleApi('lists/'+encodeURIComponent(taskList.id)+'/tasks/'+encodeURIComponent(remote.id),{method:'DELETE'});remote.deleted=true}if(remote)googleDeleted=googleDeleted.filter(x=>x!==id)}for(const remote of remotes){if(remote.deleted)continue;let t=tasks.find(x=>x.googleTaskId===remote.id)||tasks.find(x=>markerId(remote.notes)===x.id);if(!t){const ext=extFromNotes(remote.notes);t={id:markerId(remote.notes)||('g'+remote.id),title:remote.title||'할 일',description:descriptionFromNotes(remote.notes),date:googleDueDate(remote.due),time:'',repeat:repeatFromNotes(remote.notes),done:remote.status==='completed',starred:ext?ext.starred:false,isNote:ext?ext.isNote:false,tags:ext?ext.tags:[],subtasks:ext?ext.subtasks:[],attachments:ext?ext.attachments:[],notifiedAt:'',createdAt:Date.now(),googleTaskId:remote.id,googleListId:taskList.id,googleUpdated:remote.updated||'',googleSnapshot:''};tasks.push(t);t.googleSnapshot=googleSnapshot(t);t.googleUpdated=remote.updated||'';linkedRemote.add(remote.id);continue}t.googleTaskId=remote.id;t.googleListId=taskList.id;let snap=t.googleSnapshot||'';const legacySnap=JSON.stringify({title:t.title,date:t.date||'',done:!!t.done}),legacySnap2=JSON.stringify({title:t.title,description:t.description||'',date:t.date||'',done:!!t.done});if(!snap||snap===legacySnap||snap===legacySnap2){t.description=descriptionFromNotes(remote.notes);const rep=repeatFromNotes(remote.notes);if(rep||!t.repeat)t.repeat=rep;const ext=extFromNotes(remote.notes);if(ext){if(ext.starred)t.starred=true;if(ext.isNote)t.isNote=true;if(ext.tags.length&&(!t.tags||!t.tags.length))t.tags=ext.tags;if(ext.subtasks.length&&(!t.subtasks||!t.subtasks.length))t.subtasks=ext.subtasks;if(ext.attachments.length&&(!t.attachments||!t.attachments.length))t.attachments=ext.attachments}if(snap){t.googleSnapshot=googleSnapshot(t);snap=t.googleSnapshot}}const isLocalNewer=t.localUpdated&&(!t.googleUpdated||Date.parse(t.localUpdated)>Date.parse(t.googleUpdated));const localChanged=(snap&&googleSnapshot(t)!==snap)||isLocalNewer;const remoteChanged=snap&&String(remote.updated||'')!==String(t.googleUpdated||'')&&!isLocalNewer;if(localChanged){const patch={title:t.title,notes:notesForTask(t),status:t.done?'completed':'needsAction'};if(t.date)patch.due=t.date+'T00:00:00.000Z';else patch.due=null;const updated=await googleApi('lists/'+encodeURIComponent(taskList.id)+'/tasks/'+encodeURIComponent(remote.id),{method:'PATCH',body:JSON.stringify(patch)});remote.updated=updated.updated||new Date().toISOString();t.googleUpdated=remote.updated}else if(remoteChanged){t.title=remote.title||t.title;t.description=descriptionFromNotes(remote.notes);const rep=repeatFromNotes(remote.notes);if(rep)t.repeat=rep;const ext=extFromNotes(remote.notes);if(ext){t.starred=ext.starred;t.isNote=ext.isNote;t.tags=ext.tags;t.subtasks=ext.subtasks;t.attachments=ext.attachments}t.date=googleDueDate(remote.due);t.done=remote.status==='completed'}t.googleUpdated=remote.updated||t.googleUpdated||'';t.googleSnapshot=googleSnapshot(t);linkedRemote.add(remote.id)}for(const t of tasks){if(t.googleTaskId&&linkedRemote.has(t.googleTaskId))continue;if(t.googleTaskId)continue;const targetListForTask=t.googleListId||googleTaskListId;if(targetListForTask!==taskList.id)continue;const remote=remotes.find(r=>!r.deleted&&markerId(r.notes)===t.id);if(remote){t.googleTaskId=remote.id;t.googleListId=taskList.id;t.description=descriptionFromNotes(remote.notes);const rep=repeatFromNotes(remote.notes);if(rep)t.repeat=rep;t.googleUpdated=remote.updated||'';t.googleSnapshot=googleSnapshot(t);linkedRemote.add(remote.id);continue}const body={title:t.title,notes:notesForTask(t),status:t.done?'completed':'needsAction'};if(t.date)body.due=t.date+'T00:00:00.000Z';const created=await googleApi('lists/'+encodeURIComponent(taskList.id)+'/tasks',{method:'POST',body:JSON.stringify(body)});t.googleTaskId=created.id;t.googleListId=taskList.id;t.googleUpdated=created.updated||'';t.googleSnapshot=googleSnapshot(t);linkedRemote.add(created.id)}}localStorage.setItem(GOOGLE_DELETED_KEY,JSON.stringify(googleDeleted));tasks=tasks.filter(t=>!t.googleTaskId||allByGoogle.get(t.googleTaskId)?.deleted!==true);const nextFp=taskFingerprint(tasks);const tasksChanged=prevFp!==nextFp||prevListsFp!==JSON.stringify(googleTaskLists||[]);try{localStorage.setItem(STORE,JSON.stringify(tasks));hadLocalData=true}catch(_){}if(cloudUser&&tasksChanged)scheduleCloudSync();updateSyncStatus('Google 동기화됨');if(tasksChanged)requestBackgroundRender();if(manual)showNotice('Google Tasks '+googleTaskLists.length+'개 목록과 동기화했습니다.');return true}catch(error){updateSyncStatus('Google 연결 오류');if(manual)showNotice(error.message||'Google Tasks 동기화에 실패했어요.');return false}finally{googleSyncBusy=false;if(googleSyncQueued){googleSyncQueued=false;setTimeout(()=>syncGoogleTasks(false),200);}}}
 function openQuickSearchModal(){
   document.querySelector('.quick-search-back')?.remove();
   const back=document.createElement('div');
@@ -2136,7 +2184,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 setInterval(pollCloud,5000);window.addEventListener('focus',()=>{syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}}});initCloud();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v79')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v80')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
