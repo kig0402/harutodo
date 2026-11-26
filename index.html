@@ -148,6 +148,9 @@ body.is-task-dragging,body.is-task-dragging *{user-select:none!important;-webkit
 .subtask-mini.done span{text-decoration:line-through;color:#9aa1ab}
 .subtask-mini-chk{width:15px;height:15px;border-radius:4px;border:1.5px solid #c5cbd4;background:#fff;padding:0;flex:none;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff}
 .subtask-mini.done .subtask-mini-chk{background:var(--blue);border-color:var(--blue)}
+.task-info-modal .subtask-preview-list{gap:6px;margin-top:8px}
+.task-info-modal .subtask-mini{font-size:15px;gap:9px;padding:3px 0;line-height:1.45;color:var(--ink)}
+.task-info-modal .subtask-mini-chk{width:18px;height:18px;border-radius:5px;font-size:11px}
 .search-btn{width:34px!important;height:34px!important;min-width:34px;border-radius:50%!important;border:1px solid var(--line)!important;background:#fff!important;color:var(--ink)!important;display:inline-flex;align-items:center;justify-content:center;padding:0!important;transition:background .15s}
 .search-btn:hover{background:#f4f5f8!important}
 .search-input-wrap{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--line);border-radius:11px;background:#f8f9fb;margin-bottom:12px}
@@ -2364,7 +2367,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 setInterval(pollCloud,5000);window.addEventListener('focus',()=>{syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);if(gcalAccessToken&&Date.now()<gcalTokenExpires)fetchGoogleCalendarApi(false)}}});initCloud();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v90')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v91')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
