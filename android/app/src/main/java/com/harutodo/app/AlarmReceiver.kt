@@ -44,7 +44,9 @@ class AlarmReceiver : BroadcastReceiver() {
         )
 
         val contentText = if (time.isNotEmpty()) "$time · $title" else title
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val badgeCount = context.getSharedPreferences("haru_alarms_prefs", Context.MODE_PRIVATE)
+            .getInt("today_badge_count", 0)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle("하루 · 할 일 시간이에요")
             .setContentText(contentText)
@@ -53,7 +55,10 @@ class AlarmReceiver : BroadcastReceiver() {
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
             .setContentIntent(contentPi)
-            .build()
+        if (badgeCount > 0) {
+            builder.setNumber(badgeCount)
+        }
+        val notification = builder.build()
 
         NotificationManagerCompat.from(context).notify(notifId, notification)
     }

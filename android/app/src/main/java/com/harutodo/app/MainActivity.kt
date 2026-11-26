@@ -246,5 +246,13 @@ class MainActivity : AppCompatActivity() {
         fun syncAlarms(tasksJson: String) {
             AlarmScheduler.syncAlarms(applicationContext, tasksJson)
         }
+
+        @JavascriptInterface
+        fun updateBadge(count: Int) {
+            applicationContext.getSharedPreferences("haru_alarms_prefs", Context.MODE_PRIVATE)
+                .edit()
+                .putInt("today_badge_count", count)
+                .apply()
+        }
     }
 }
