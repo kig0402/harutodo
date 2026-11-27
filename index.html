@@ -838,7 +838,9 @@ function todayView(){
   const daytimeTasks=open.filter(t=>isOverdue(t)||!t.time||parseInt(t.time.split(':')[0],10)<18)
     .sort((a,b)=>(isOverdue(b)-isOverdue(a))||(isOverdue(a)?((a.date||'').localeCompare(b.date||'')||(a.time||'99:99').localeCompare(b.time||'99:99')):(a.time||'99:99').localeCompare(b.time||'99:99')));
   const eveningTasks=open.filter(t=>!isOverdue(t)&&t.time&&parseInt(t.time.split(':')[0],10)>=18);
-  return '<section class="view '+(view==='today'?'active':'')+'"><div class="heading"><div><p class="eyebrow">'+fmt(now,{month:'long',day:'numeric',weekday:'long'})+'</p><h1><span class="heading-ico">'+THINGS_ICONS.today(22)+'</span>오늘의 할 일</h1><p class="sub">작은 한 걸음이 좋은 하루를 만들어요.</p></div><div class="score"><b>'+done.length+' / '+all.length+'</b><br>완료</div></div>'+composer(dayKey(now))+evBlock+'<div class="bar">할 일<small>'+daytimeTasks.length+'개</small></div><div class="time-dropzone list" data-section="daytime">'+(daytimeTasks.length?daytimeTasks.map(row).join(''):'<div class="section-empty">할 일을 여기에 드래그해 옮길 수 있어요</div>')+'</div>'+timeSection('저녁','18:00 이후','evening',eveningTasks,THINGS_ICONS.evening(15))+'<div class="done-bar"><span>완료된 할 일 <small>'+done.length+'개</small></span><button type="button" class="toggle-done-btn" data-toggle-done>'+(hideCompletedTasks?'완료 목록 보기':'완료 목록 숨기기')+'</button></div>'+(hideCompletedTasks?'':'<div class="list">'+(done.length?done.map(row).join(''):empty('완료된 할 일이 없어요.'))+'</div>')+'</section>';
+  const starredTasks=tasks.filter(t=>!t.done&&t.starred).sort((a,b)=>(a.date||'9999-99-99').localeCompare(b.date||'9999-99-99')||(a.time||'99:99').localeCompare(b.time||'99:99'));
+  const starredBlock='<div class="time-section"><div class="time-section-bar"><span class="sec-title">'+THINGS_ICONS.today(15)+'별표 할 일 <small>중요 표시</small></span><b>'+starredTasks.length+'개</b></div><div class="list">'+(starredTasks.length?starredTasks.map(t=>row(t,{showDate:true})).join(''):'<div class="section-empty">별표 표시한 중요 할 일이 여기에 모여요</div>')+'</div></div>';
+  return '<section class="view '+(view==='today'?'active':'')+'"><div class="heading"><div><p class="eyebrow">'+fmt(now,{month:'long',day:'numeric',weekday:'long'})+'</p><h1><span class="heading-ico">'+THINGS_ICONS.today(22)+'</span>오늘의 할 일</h1><p class="sub">작은 한 걸음이 좋은 하루를 만들어요.</p></div><div class="score"><b>'+done.length+' / '+all.length+'</b><br>완료</div></div>'+composer(dayKey(now))+evBlock+'<div class="bar">할 일<small>'+daytimeTasks.length+'개</small></div><div class="time-dropzone list" data-section="daytime">'+(daytimeTasks.length?daytimeTasks.map(row).join(''):'<div class="section-empty">할 일을 여기에 드래그해 옮길 수 있어요</div>')+'</div>'+timeSection('저녁','18:00 이후','evening',eveningTasks,THINGS_ICONS.evening(15))+starredBlock+'<div class="done-bar"><span>완료된 할 일 <small>'+done.length+'개</small></span><button type="button" class="toggle-done-btn" data-toggle-done>'+(hideCompletedTasks?'완료 목록 보기':'완료 목록 숨기기')+'</button></div>'+(hideCompletedTasks?'':'<div class="list">'+(done.length?done.map(row).join(''):empty('완료된 할 일이 없어요.'))+'</div>')+'</section>';
 }
 function nextView(){
   const today=new Date();today.setHours(0,0,0,0);
@@ -892,9 +894,29 @@ function nextView(){
   }
 
   const evHtml=selectedEvents.length?'<div class="next-events-wrap" style="margin-bottom:10px">'+selectedEvents.map(ev=>'<div class="next-event-card"><span class="cal-event-badge" style="'+eventBadgeStyle(ev)+'">일정</span><span class="cal-event-title">'+esc(ev.title)+'</span><span class="cal-event-time">'+(ev.isAllDay?'종일':esc(ev.time+(ev.endTime?' ~ '+ev.endTime:'')))+'</span></div>').join('')+'</div>':'';
-  const listHtml=selectedTasks.length?selectedTasks.map(t=>row(t,{showDate:showDateFlag})).join(''):(selectedEvents.length?'':empty('예정된 할 일이 없어요.'));
+  let scrollContentHtml='';
+  if(forecastSel==='undated'){
+    if(!undatedTasks.length){
+      scrollContentHtml='<div class="list forecast-list">'+empty('날짜 없는 할 일이 없어요.')+'</div>';
+    }else{
+      const availLists=googleTaskLists.length?googleTaskLists:[{id:'__default__',title:'기본 목록',isDefault:true}];
+      const grouped=new Map(availLists.map(l=>[l.id,[]]));
+      for(const t of undatedTasks){
+        const matched=availLists.find(l=>l.id===t.googleListId||(!t.googleListId&&l.isDefault))||availLists[0];
+        grouped.get(matched.id).push(t);
+      }
+      scrollContentHtml=availLists.map((lst,idx)=>{
+        const arr=grouped.get(lst.id)||[];
+        if(!arr.length)return '';
+        return '<div class="bar" style="margin:'+(idx===0?'6px':'18px')+' 2px 8px"><span>'+getListIcon(lst)+' '+esc(lst.title)+'</span><small>'+arr.length+'개</small></div><div class="list forecast-list">'+arr.map(t=>row(t)).join('')+'</div>';
+      }).join('');
+    }
+  }else{
+    const listHtml=selectedTasks.length?selectedTasks.map(t=>row(t,{showDate:showDateFlag})).join(''):(selectedEvents.length?'':empty('예정된 할 일이 없어요.'));
+    scrollContentHtml='<div class="list forecast-list">'+listHtml+'</div>';
+  }
 
-  return '<section class="view next-view '+(view==='next'?'active':'')+'"><div class="heading"><div><p class="eyebrow">Forecast</p><h1><span class="heading-ico">'+THINGS_ICONS.next(22)+'</span>예정</h1><p class="sub">날짜 칸을 눌러 해당 일정을 바로 확인하세요.</p></div><div class="score"><b>'+totalScheduled+'개</b><br>예정</div></div><div class="forecast-strip">'+cells.join('')+'</div>'+composer(composerDefaultDate)+'<div class="forecast-detail-head"><span class="forecast-detail-title">'+esc(detailTitle)+'</span><span class="forecast-detail-count">'+selectedTasks.length+'개</span></div><div class="forecast-scroll-area">'+evHtml+'<div class="list forecast-list">'+listHtml+'</div></div></section>';
+  return '<section class="view next-view '+(view==='next'?'active':'')+'"><div class="heading"><div><p class="eyebrow">Forecast</p><h1><span class="heading-ico">'+THINGS_ICONS.next(22)+'</span>예정</h1><p class="sub">날짜 칸을 눌러 해당 일정을 바로 확인하세요.</p></div><div class="score"><b>'+totalScheduled+'개</b><br>예정</div></div><div class="forecast-strip">'+cells.join('')+'</div>'+composer(composerDefaultDate)+'<div class="forecast-detail-head"><span class="forecast-detail-title">'+esc(detailTitle)+'</span><span class="forecast-detail-count">'+selectedTasks.length+'개</span></div><div class="forecast-scroll-area">'+evHtml+scrollContentHtml+'</div></section>';
 }
 let calScrollNeedSnap=true,calSavedScrollTop=null;
 function buildCalDataMaps(){
@@ -2533,7 +2555,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 setInterval(pollCloud,5000);window.addEventListener('focus',()=>{syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);refreshCalendarEvents(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);refreshCalendarEvents(false)}}});initCloud();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v106')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v107')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
