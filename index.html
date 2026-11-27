@@ -1520,6 +1520,9 @@ function attachTaskDragEvents(task,onMovedCallback){
     const popover=document.querySelector('.day-popover');
     const popoverBack=document.querySelector('.day-popover-back');
 
+    const isCalDragTarget=task.classList.contains('cal-item')||Boolean(task.closest('.day-popover'));
+    const holdDelay=isCalDragTarget?400:1000;
+    const moveCancelThreshold=isCalDragTarget?14:10;
     const holdTimer=setTimeout(()=>{
       if(isSwipingTask||wasSwipeOpen)return;
       isDragging=true;
@@ -1537,7 +1540,7 @@ function attachTaskDragEvents(task,onMovedCallback){
       document.body.appendChild(ghost);
       ghost.style.left=startX+'px';
       ghost.style.top=startY+'px';
-    },1000);
+    },holdDelay);
 
     function onTouchMove(ev){
       const t=ev.touches[0];
@@ -1551,7 +1554,7 @@ function attachTaskDragEvents(task,onMovedCallback){
             isSwipingTask=true;
             clearTimeout(holdTimer);
             wrap.classList.add('swiping');
-          }else if(Math.abs(dx)>10||Math.abs(dy)>10){
+          }else if(Math.abs(dx)>moveCancelThreshold||Math.abs(dy)>moveCancelThreshold){
             clearTimeout(holdTimer);
             return;
           }else{
@@ -2528,7 +2531,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 setInterval(pollCloud,5000);window.addEventListener('focus',()=>{syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);refreshCalendarEvents(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);refreshCalendarEvents(false)}}});initCloud();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v102')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v103')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
