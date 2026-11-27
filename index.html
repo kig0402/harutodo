@@ -847,17 +847,19 @@ function nextView(){
   const dayKeys=[1,2,3,4].map(i=>dayKey(moveDay(today,i)));
   const day4Key=dayKeys[3];
 
+  const undatedTasks=tasks.filter(t=>!t.done&&!t.date).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
   const pastTasks=tasks.filter(t=>!t.done&&!t.isNote&&Boolean(t.date)&&t.date<todayKey).sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'99:99').localeCompare(b.time||'99:99'));
-  const todayTasks=tasks.filter(t=>!t.done&&t.date===todayKey).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+  const todayOnlyTasks=tasks.filter(t=>!t.done&&t.date===todayKey).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+  const todayTasks=[...pastTasks,...todayOnlyTasks];
   const futureBeyondTasks=tasks.filter(t=>!t.done&&Boolean(t.date)&&t.date>day4Key).sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'99:99').localeCompare(b.time||'99:99'));
   const totalScheduled=tasks.filter(t=>!t.done&&Boolean(t.date)).length;
 
-  if(forecastSel!=='past'&&forecastSel!=='today'&&forecastSel!=='future'&&!dayKeys.includes(forecastSel)){
+  if(forecastSel!=='undated'&&forecastSel!=='today'&&forecastSel!=='future'&&!dayKeys.includes(forecastSel)){
     forecastSel='today';
   }
 
   const cells=[];
-  cells.push('<button type="button" class="forecast-cell'+(forecastSel==='past'?' active':'')+'" data-forecast-sel="past"><span class="forecast-lbl">지난</span><span class="forecast-cnt '+(pastTasks.length?'past-has':'zero')+'">'+pastTasks.length+'</span></button>');
+  cells.push('<button type="button" class="forecast-cell'+(forecastSel==='undated'?' active':'')+'" data-forecast-sel="undated"><span class="forecast-lbl">미정</span><span class="forecast-cnt'+(undatedTasks.length?'':' zero')+'">'+undatedTasks.length+'</span></button>');
   cells.push('<button type="button" class="forecast-cell'+(forecastSel==='today'?' active':'')+'" data-forecast-sel="today" data-forecast-date="'+todayKey+'"><span class="forecast-lbl">오늘</span><span class="forecast-cnt '+(todayTasks.length?'today-has':'zero')+'">'+todayTasks.length+'</span></button>');
   dayKeys.forEach(dk=>{
     const dObj=new Date(dk+'T00:00:00');
@@ -868,10 +870,10 @@ function nextView(){
   cells.push('<button type="button" class="forecast-cell'+(forecastSel==='future'?' active':'')+'" data-forecast-sel="future"><span class="forecast-lbl">이후</span><span class="forecast-cnt'+(futureBeyondTasks.length?'':' zero')+'">'+futureBeyondTasks.length+'</span></button>');
 
   let selectedTasks=[],selectedEvents=[],detailTitle='',composerDefaultDate='',showDateFlag=false;
-  if(forecastSel==='past'){
-    selectedTasks=pastTasks;
-    detailTitle='지난 할 일';
-    showDateFlag=true;
+  if(forecastSel==='undated'){
+    selectedTasks=undatedTasks;
+    detailTitle='미정 · 날짜 없는 할 일';
+    composerDefaultDate='';
   }else if(forecastSel==='today'){
     selectedTasks=todayTasks;
     selectedEvents=calendarEvents.filter(e=>e.date===todayKey);
@@ -2531,7 +2533,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 setInterval(pollCloud,5000);window.addEventListener('focus',()=>{syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);refreshCalendarEvents(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);refreshCalendarEvents(false)}}});initCloud();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v104')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v105')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
