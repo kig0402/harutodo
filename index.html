@@ -65,6 +65,8 @@ body[data-view="calendar"] .layout{height:100dvh;max-height:100dvh;overflow:hidd
 .task[draggable="true"]{cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .task.task-dragging{opacity:.35;border-style:dashed}
 .task.task-touch-dragging{opacity:.35;border-color:var(--green);border-style:dashed}
+.task.task-drop-above{box-shadow:inset 0 2.5px 0 #2d7ff9}
+.task.task-drop-below{box-shadow:inset 0 -2.5px 0 #2d7ff9}
 .task-drag-ghost{position:fixed;pointer-events:none;z-index:10000;background:#ffffff;border:2px solid var(--green);box-shadow:0 14px 32px rgba(0,0,0,.22);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:650;color:var(--ink);max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transform:translate(-50%,-70%) rotate(2.5deg) scale(1.05)}
 .ghost-target-date{font-size:11px;color:var(--green);margin-top:2px;font-weight:600}
 .cell.drag-over{background:var(--soft)!important;outline:2px dashed var(--green)!important;outline-offset:-2px;border-radius:6px;transform:scale(1.06);transition:transform .12s ease,background-color .12s ease;z-index:25}
@@ -274,7 +276,8 @@ const GOOGLE_DELETED_KEY='haru-google-deleted-v1';let googleDeleted=[];try{googl
 const GOOGLE_LISTS_KEY='haru-google-lists-v1';let googleTaskLists=[];try{googleTaskLists=JSON.parse(localStorage.getItem(GOOGLE_LISTS_KEY)||'[]')}catch(_){googleTaskLists=[]}
 const LIST_ICONS_KEY='haru-list-icons-v1';let listIcons={};try{listIcons=JSON.parse(localStorage.getItem(LIST_ICONS_KEY)||'{}')||{}}catch(_){listIcons={}}
 const LIST_ORDER_KEY='haru-list-order-v1';let listOrder=[];try{listOrder=JSON.parse(localStorage.getItem(LIST_ORDER_KEY)||'[]');if(!Array.isArray(listOrder))listOrder=[]}catch(_){listOrder=[]}
-let activeListId=null,activeTagId=null,forecastSel='today',listReorderMode=false;
+const UNDATED_ORDER_KEY='haru-undated-order-v1';let undatedOrder=[];try{undatedOrder=JSON.parse(localStorage.getItem(UNDATED_ORDER_KEY)||'[]');if(!Array.isArray(undatedOrder))undatedOrder=[]}catch(_){undatedOrder=[]}
+let activeListId=null,activeTagId=null,forecastSel='today',listReorderMode=false,draggingUndatedTaskId='',draggingUndatedListEl=null;
 function getOrderedTaskLists(){
   const base=googleTaskLists.length?googleTaskLists:[{id:'__default__',title:'기본 목록',isDefault:true}];
   if(!Array.isArray(listOrder)||!listOrder.length)return base;
@@ -306,6 +309,40 @@ function reorderListByDrop(fromId,toId,insertAfter){
   if(insertAfter)toIdx+=1;
   cur.splice(toIdx,0,fromId);
   saveListOrder(cur);
+  render();
+}
+function sortWithUndatedOrder(list){
+  const pos=new Map((undatedOrder||[]).map((id,i)=>[id,i]));
+  return list.slice().sort((a,b)=>{
+    const ad=a.date||'',bd=b.date||'';
+    if(ad&&bd)return ad.localeCompare(bd)||(a.time||'99:99').localeCompare(b.time||'99:99');
+    if(ad&&!bd)return -1;
+    if(!ad&&bd)return 1;
+    const ia=pos.has(a.id)?pos.get(a.id):999999;
+    const ib=pos.has(b.id)?pos.get(b.id):999999;
+    if(ia!==ib)return ia-ib;
+    return (b.createdAt||0)-(a.createdAt||0);
+  });
+}
+function reorderUndatedTasks(fromId,toId,insertAfter,visibleIds){
+  if(!fromId||!toId||fromId===toId)return;
+  const fromTask=tasks.find(t=>t.id===fromId);
+  const toTask=tasks.find(t=>t.id===toId);
+  if(!fromTask||!toTask||fromTask.date||toTask.date)return;
+  const order=Array.isArray(undatedOrder)?undatedOrder.slice():[];
+  const seen=new Set(order);
+  for(const id of (visibleIds||[])){
+    if(!seen.has(id)){order.push(id);seen.add(id);}
+  }
+  const fromIdx=order.indexOf(fromId);
+  if(fromIdx>=0)order.splice(fromIdx,1);
+  let toIdx=order.indexOf(toId);
+  if(toIdx<0)return;
+  if(insertAfter)toIdx+=1;
+  order.splice(toIdx,0,fromId);
+  undatedOrder=order;
+  try{localStorage.setItem(UNDATED_ORDER_KEY,JSON.stringify(undatedOrder))}catch(_){}
+  if(cloudUser&&cloudReady)saveCloud();
   render();
 }
 function to24(v){if(!v)return '';if(/^\d\d:\d\d$/.test(v))return v;const m=String(v).match(/(오전|오후)\s*(\d{1,2}):(\d{2})/);if(!m)return '';let h=Number(m[2])%12;if(m[1]==='오후')h+=12;return String(h).padStart(2,'0')+':'+m[3]}
@@ -940,9 +977,9 @@ function nextView(){
         grouped.get(matched.id).push(t);
       }
       scrollContentHtml=availLists.map((lst,idx)=>{
-        const arr=grouped.get(lst.id)||[];
+        const arr=sortWithUndatedOrder(grouped.get(lst.id)||[]);
         if(!arr.length)return '';
-        return '<div class="bar" style="margin:'+(idx===0?'6px':'18px')+' 2px 8px"><span>'+getListIcon(lst)+' '+esc(lst.title)+'</span><small>'+arr.length+'개</small></div><div class="list forecast-list">'+arr.map(t=>row(t)).join('')+'</div>';
+        return '<div class="bar" style="margin:'+(idx===0?'6px':'18px')+' 2px 8px"><span>'+getListIcon(lst)+' '+esc(lst.title)+'</span><small>'+arr.length+'개</small></div><div class="list forecast-list undated-sortable-list">'+arr.map(t=>row(t)).join('')+'</div>';
       }).join('');
     }
   }else{
@@ -1068,11 +1105,11 @@ function listsView(){
     const curList=displayLists.find(l=>l.id===activeListId);
     if(curList){
       const all=tasksForList(curList);
-      const open=all.filter(t=>!t.done).sort((a,b)=>(a.date||'9999-99-99').localeCompare(b.date||'9999-99-99')||(a.time||'99:99').localeCompare(b.time||'99:99'));
+      const open=sortWithUndatedOrder(all.filter(t=>!t.done));
       const done=all.filter(t=>t.done);
       const listIdForForm=curList.id==='__default__'?'':curList.id;
       const curIcon=getListIcon(curList);
-      return '<section class="view lists-view '+(view==='lists'?'active':'')+'"><button type="button" class="list-back-btn" data-list-back>← 전체 목록</button><div class="heading"><div><p class="eyebrow">Google Tasks 목록</p><h1><button type="button" class="list-folder-ico" data-pick-list-icon="'+esc(curList.id)+'" data-pick-list-title="'+esc(curList.title)+'" title="아이콘 변경" style="border:0;margin-right:2px">'+curIcon+'</button>'+esc(curList.title)+'</h1><p class="sub">아이콘을 눌러 원하는 모양으로 바꿀 수 있어요.</p></div><div class="score"><b>'+open.length+'개</b><br>할 일</div></div>'+composer('',listIdForForm)+'<div class="list">'+(open.length?open.map(t=>row(t,{showDate:true})).join(''):empty('이 목록에 할 일이 없어요.'))+'</div><div class="done-bar"><span>완료된 할 일 <small>'+done.length+'개</small></span><button type="button" class="toggle-done-btn" data-toggle-done>'+(hideCompletedTasks?'완료 목록 보기':'완료 목록 숨기기')+'</button></div>'+(hideCompletedTasks?'':'<div class="list">'+(done.length?done.map(t=>row(t,{showDate:true})).join(''):empty('완료된 할 일이 없어요.'))+'</div>')+'</section>';
+      return '<section class="view lists-view '+(view==='lists'?'active':'')+'"><button type="button" class="list-back-btn" data-list-back>← 전체 목록</button><div class="heading"><div><p class="eyebrow">Google Tasks 목록</p><h1><button type="button" class="list-folder-ico" data-pick-list-icon="'+esc(curList.id)+'" data-pick-list-title="'+esc(curList.title)+'" title="아이콘 변경" style="border:0;margin-right:2px">'+curIcon+'</button>'+esc(curList.title)+'</h1><p class="sub">아이콘을 눌러 원하는 모양으로 바꿀 수 있어요.</p></div><div class="score"><b>'+open.length+'개</b><br>할 일</div></div>'+composer('',listIdForForm)+'<div class="list undated-sortable-list">'+(open.length?open.map(t=>row(t,{showDate:true})).join(''):empty('이 목록에 할 일이 없어요.'))+'</div><div class="done-bar"><span>완료된 할 일 <small>'+done.length+'개</small></span><button type="button" class="toggle-done-btn" data-toggle-done>'+(hideCompletedTasks?'완료 목록 보기':'완료 목록 숨기기')+'</button></div>'+(hideCompletedTasks?'':'<div class="list">'+(done.length?done.map(t=>row(t,{showDate:true})).join(''):empty('완료된 할 일이 없어요.'))+'</div>')+'</section>';
     }
     activeListId=null;
   }
@@ -1118,10 +1155,10 @@ function tagsView(){
     const curTag=userTags.find(tg=>tg.id===activeTagId||tg.name===activeTagId);
     if(curTag){
       const all=tasksForTag(curTag);
-      const open=all.filter(t=>!t.done).sort((a,b)=>(a.date||'9999-99-99').localeCompare(b.date||'9999-99-99')||(a.time||'99:99').localeCompare(b.time||'99:99'));
+      const open=sortWithUndatedOrder(all.filter(t=>!t.done));
       const done=all.filter(t=>t.done).sort((a,b)=>(a.date||'9999-99-99').localeCompare(b.date||'9999-99-99')||(a.time||'99:99').localeCompare(b.time||'99:99'));
       const dotColor=curTag.color||'#8b5cf6';
-      return '<section class="view tags-view '+(view==='tags'?'active':'')+'"><button type="button" class="list-back-btn" data-tag-back>← 전체 태그</button><div class="heading"><div><p class="eyebrow">태그별 할 일</p><h1><button type="button" class="list-folder-ico" data-pick-tag-color="'+esc(curTag.id)+'" title="색상 변경" style="border:0;background:'+esc(hexToRgba(dotColor,0.14)||'#f3f5f8')+';color:'+esc(dotColor)+';font-weight:800;font-size:18px">#</button>'+esc(curTag.name)+'</h1><p class="sub"># 아이콘을 눌러 태그 색상을 바꿀 수 있어요.</p></div><div class="score"><b>'+open.length+'개</b><br>할 일</div></div>'+composer('','',curTag.id)+'<div class="list">'+(open.length?open.map(t=>row(t,{showDate:true})).join(''):empty('이 태그가 설정된 할 일이 없어요.'))+'</div><div class="done-bar"><span>완료된 할 일 <small>'+done.length+'개</small></span><button type="button" class="toggle-done-btn" data-toggle-done>'+(hideCompletedTasks?'완료 목록 보기':'완료 목록 숨기기')+'</button></div>'+(hideCompletedTasks?'':'<div class="list">'+(done.length?done.map(t=>row(t,{showDate:true})).join(''):empty('완료된 할 일이 없어요.'))+'</div>')+'</section>';
+      return '<section class="view tags-view '+(view==='tags'?'active':'')+'"><button type="button" class="list-back-btn" data-tag-back>← 전체 태그</button><div class="heading"><div><p class="eyebrow">태그별 할 일</p><h1><button type="button" class="list-folder-ico" data-pick-tag-color="'+esc(curTag.id)+'" title="색상 변경" style="border:0;background:'+esc(hexToRgba(dotColor,0.14)||'#f3f5f8')+';color:'+esc(dotColor)+';font-weight:800;font-size:18px">#</button>'+esc(curTag.name)+'</h1><p class="sub"># 아이콘을 눌러 태그 색상을 바꿀 수 있어요.</p></div><div class="score"><b>'+open.length+'개</b><br>할 일</div></div>'+composer('','',curTag.id)+'<div class="list undated-sortable-list">'+(open.length?open.map(t=>row(t,{showDate:true})).join(''):empty('이 태그가 설정된 할 일이 없어요.'))+'</div><div class="done-bar"><span>완료된 할 일 <small>'+done.length+'개</small></span><button type="button" class="toggle-done-btn" data-toggle-done>'+(hideCompletedTasks?'완료 목록 보기':'완료 목록 숨기기')+'</button></div>'+(hideCompletedTasks?'':'<div class="list">'+(done.length?done.map(t=>row(t,{showDate:true})).join(''):empty('완료된 할 일이 없어요.'))+'</div>')+'</section>';
     }
     activeTagId=null;
   }
@@ -1541,22 +1578,57 @@ function confirmMoveTaskToDate(id,targetDate,onDone){const t=tasks.find(x=>x.id=
 function attachTaskDragEvents(task,onMovedCallback){
   const taskId=task.dataset.taskId;
   if(!taskId)return;
+  const srcSortableList=task.closest('.undated-sortable-list');
+  const isUndatedSortable=Boolean(srcSortableList&&!task.dataset.taskDate&&!task.classList.contains('completed'));
 
   task.ondragstart=e=>{
     e.dataTransfer.setData('text/plain',taskId);
     e.dataTransfer.effectAllowed='move';
     task.classList.add('task-dragging');
+    if(isUndatedSortable){draggingUndatedTaskId=taskId;draggingUndatedListEl=srcSortableList}
     document.querySelector('.day-popover')?.classList.add('dragging-out');
     document.querySelector('.day-popover-back')?.classList.add('dragging-out');
   };
 
   task.ondragend=()=>{
     task.classList.remove('task-dragging');
+    draggingUndatedTaskId='';
+    draggingUndatedListEl=null;
     suppressClickUntil=Date.now()+600;
     document.querySelector('.day-popover')?.classList.remove('dragging-out');
     document.querySelector('.day-popover-back')?.classList.remove('dragging-out');
     document.querySelectorAll('.cell[data-day], .next-date-group, .time-dropzone, .forecast-cell[data-forecast-date]').forEach(el=>el.classList.remove('drag-over'));
+    document.querySelectorAll('.task-drop-above,.task-drop-below').forEach(el=>el.classList.remove('task-drop-above','task-drop-below'));
   };
+
+  if(isUndatedSortable){
+    task.ondragover=e=>{
+      if(!draggingUndatedTaskId||draggingUndatedTaskId===taskId||draggingUndatedListEl!==srcSortableList)return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      const r=task.getBoundingClientRect();
+      const after=e.clientY>(r.top+r.height/2);
+      srcSortableList.querySelectorAll('.task-drop-above,.task-drop-below').forEach(el=>el.classList.remove('task-drop-above','task-drop-below'));
+      task.classList.add(after?'task-drop-below':'task-drop-above');
+    };
+    task.ondragleave=e=>{
+      if(!task.contains(e.relatedTarget))task.classList.remove('task-drop-above','task-drop-below');
+    };
+    task.ondrop=e=>{
+      if(!draggingUndatedTaskId||draggingUndatedTaskId===taskId||draggingUndatedListEl!==srcSortableList)return;
+      e.preventDefault();
+      e.stopPropagation();
+      const r=task.getBoundingClientRect();
+      const after=e.clientY>(r.top+r.height/2);
+      const fromId=draggingUndatedTaskId;
+      const visibleIds=[...srcSortableList.querySelectorAll('.task[data-task-id]')].filter(el=>!el.dataset.taskDate&&!el.classList.contains('completed')).map(el=>el.dataset.taskId);
+      draggingUndatedTaskId='';
+      draggingUndatedListEl=null;
+      srcSortableList.querySelectorAll('.task-drop-above,.task-drop-below').forEach(el=>el.classList.remove('task-drop-above','task-drop-below'));
+      suppressClickUntil=Date.now()+400;
+      reorderUndatedTasks(fromId,taskId,after,visibleIds);
+    };
+  }
 
   task.addEventListener('contextmenu',e=>{e.preventDefault()});
 
@@ -1585,8 +1657,8 @@ function attachTaskDragEvents(task,onMovedCallback){
     const popoverBack=document.querySelector('.day-popover-back');
 
     const isCalDragTarget=task.classList.contains('cal-item')||Boolean(task.closest('.day-popover'));
-    const holdDelay=isCalDragTarget?400:1000;
-    const moveCancelThreshold=isCalDragTarget?14:10;
+    const holdDelay=(isCalDragTarget||isUndatedSortable)?380:1000;
+    const moveCancelThreshold=(isCalDragTarget||isUndatedSortable)?14:10;
     const holdTimer=setTimeout(()=>{
       if(isSwipingTask||wasSwipeOpen)return;
       isDragging=true;
@@ -1600,7 +1672,7 @@ function attachTaskDragEvents(task,onMovedCallback){
       const titleText=titleEl?titleEl.textContent:(task.textContent||'할 일').trim();
       ghost=document.createElement('div');
       ghost.className='task-drag-ghost';
-      ghost.innerHTML=esc(titleText)+'<div class="ghost-target-date">원하는 날짜로 천천히 이동하세요</div>';
+      ghost.innerHTML=esc(titleText)+'<div class="ghost-target-date">'+(isUndatedSortable?'원하는 순서 위치로 이동하세요':'원하는 날짜로 천천히 이동하세요')+'</div>';
       document.body.appendChild(ghost);
       ghost.style.left=startX+'px';
       ghost.style.top=startY+'px';
@@ -1650,19 +1722,28 @@ function attachTaskDragEvents(task,onMovedCallback){
       const targetGroup=elUnder?elUnder.closest('.next-date-group'):null;
       const targetTimeSec=elUnder?elUnder.closest('.time-dropzone[data-section]'):null;
       const targetForecastCell=elUnder?elUnder.closest('.forecast-cell[data-forecast-date]'):null;
+      const rawSortTask=(isUndatedSortable&&elUnder)?elUnder.closest('.undated-sortable-list .task[data-task-id]'):null;
+      const targetSortTask=(rawSortTask&&srcSortableList&&srcSortableList.contains(rawSortTask)&&!rawSortTask.dataset.taskDate&&!rawSortTask.classList.contains('completed')&&rawSortTask!==task)?rawSortTask:null;
 
       document.querySelectorAll('.cell[data-day], .next-date-group, .time-dropzone, .forecast-cell[data-forecast-date]').forEach(el=>{
         if(hasMovedEnough&&(el===targetCell||el===targetGroup||el===targetTimeSec||el===targetForecastCell))el.classList.add('drag-over');
         else el.classList.remove('drag-over');
       });
+      document.querySelectorAll('.task-drop-above,.task-drop-below').forEach(el=>el.classList.remove('task-drop-above','task-drop-below'));
+      if(hasMovedEnough&&targetSortTask&&!targetForecastCell){
+        const r=targetSortTask.getBoundingClientRect();
+        targetSortTask.classList.add(t.clientY>(r.top+r.height/2)?'task-drop-below':'task-drop-above');
+      }
 
       if(ghost){
         const hintEl=ghost.querySelector('.ghost-target-date');
         if(hintEl){
           if(!hasMovedEnough){
-            hintEl.textContent='원하는 날짜로 천천히 이동하세요';
+            hintEl.textContent=isUndatedSortable?'원하는 순서 위치로 이동하세요':'원하는 날짜로 천천히 이동하세요';
           }else if(targetForecastCell&&targetForecastCell.dataset.forecastDate){
             hintEl.textContent='→ '+fmt(new Date(targetForecastCell.dataset.forecastDate+'T00:00:00'),{month:'numeric',day:'numeric',weekday:'short'})+' 이동';
+          }else if(targetSortTask){
+            hintEl.textContent='→ 순서 변경';
           }else if(targetCell&&targetCell.dataset.day){
             hintEl.textContent='→ '+fmt(new Date(targetCell.dataset.day+'T00:00:00'),{month:'numeric',day:'numeric',weekday:'short'})+' 이동';
           }else if(targetGroup){
@@ -1672,7 +1753,7 @@ function attachTaskDragEvents(task,onMovedCallback){
             const s=targetTimeSec.dataset.section;
             hintEl.textContent='→ '+(s==='evening'?'저녁(19:00)':'일반 할 일')+' 이동';
           }else{
-            hintEl.textContent='날짜 또는 시간대로 이동하세요';
+            hintEl.textContent=isUndatedSortable?'순서 변경할 위치로 이동하세요':'날짜 또는 시간대로 이동하세요';
           }
         }
       }
@@ -1690,6 +1771,7 @@ function attachTaskDragEvents(task,onMovedCallback){
       if(popover)popover.classList.remove('dragging-out');
       if(popoverBack)popoverBack.classList.remove('dragging-out');
       document.querySelectorAll('.cell[data-day], .next-date-group, .time-dropzone, .forecast-cell[data-forecast-date]').forEach(el=>el.classList.remove('drag-over'));
+      document.querySelectorAll('.task-drop-above,.task-drop-below').forEach(el=>el.classList.remove('task-drop-above','task-drop-below'));
     }
 
     function onTouchCancel(){
@@ -1742,9 +1824,16 @@ function attachTaskDragEvents(task,onMovedCallback){
         const targetGroup=elUnder?elUnder.closest('.next-date-group'):null;
         const targetTimeSec=elUnder?elUnder.closest('.time-dropzone[data-section]'):null;
         const targetForecastCell=elUnder?elUnder.closest('.forecast-cell[data-forecast-date]'):null;
+        const rawSortTask=(isUndatedSortable&&elUnder)?elUnder.closest('.undated-sortable-list .task[data-task-id]'):null;
+        const targetSortTask=(rawSortTask&&srcSortableList&&srcSortableList.contains(rawSortTask)&&!rawSortTask.dataset.taskDate&&!rawSortTask.classList.contains('completed')&&rawSortTask!==task)?rawSortTask:null;
 
         if(targetForecastCell&&targetForecastCell.dataset.forecastDate){
           confirmMoveTaskToDate(taskId,targetForecastCell.dataset.forecastDate,onMovedCallback);
+        }else if(targetSortTask&&targetSortTask.dataset.taskId){
+          const r=targetSortTask.getBoundingClientRect();
+          const after=lastClientY>(r.top+r.height/2);
+          const visibleIds=[...srcSortableList.querySelectorAll('.task[data-task-id]')].filter(el=>!el.dataset.taskDate&&!el.classList.contains('completed')).map(el=>el.dataset.taskId);
+          reorderUndatedTasks(taskId,targetSortTask.dataset.taskId,after,visibleIds);
         }else if(targetCell&&targetCell.dataset.day){
           const targetDate=targetCell.dataset.day;
           const wasInPopover=Boolean(popover&&popover.contains(task));
@@ -1972,6 +2061,7 @@ async function saveCloud(){
       googleTaskLists:googleTaskLists||[],
       listIcons:listIcons||{},
       listOrder:listOrder||[],
+      undatedOrder:undatedOrder||[],
       icalUrl1:localStorage.getItem(ICAL_URL_KEY)||'',
       icalUrl2:localStorage.getItem(ICAL_URL_2_KEY)||''
     };
@@ -2036,6 +2126,10 @@ async function loadCloudTasks(user){
         if(Array.isArray(calMeta.listOrder)){
           listOrder=calMeta.listOrder;
           try{localStorage.setItem(LIST_ORDER_KEY,JSON.stringify(listOrder))}catch(_){}
+        }
+        if(Array.isArray(calMeta.undatedOrder)){
+          undatedOrder=calMeta.undatedOrder;
+          try{localStorage.setItem(UNDATED_ORDER_KEY,JSON.stringify(undatedOrder))}catch(_){}
         }
         if(calMeta.icalUrl1!==undefined)try{if(calMeta.icalUrl1)localStorage.setItem(ICAL_URL_KEY,calMeta.icalUrl1);else localStorage.removeItem(ICAL_URL_KEY)}catch(_){}
         if(calMeta.icalUrl2!==undefined)try{if(calMeta.icalUrl2)localStorage.setItem(ICAL_URL_2_KEY,calMeta.icalUrl2);else localStorage.removeItem(ICAL_URL_2_KEY)}catch(_){}
@@ -2562,6 +2656,11 @@ async function refreshCloudTasks(userId=cloudUser?.id,deferIfSaving=false,force=
       listOrder=calMeta.listOrder;
       try{localStorage.setItem(LIST_ORDER_KEY,JSON.stringify(listOrder))}catch(_){}
     }
+    if(Array.isArray(calMeta.undatedOrder)){
+      if(JSON.stringify(undatedOrder||[])!==JSON.stringify(calMeta.undatedOrder))calChanged=true;
+      undatedOrder=calMeta.undatedOrder;
+      try{localStorage.setItem(UNDATED_ORDER_KEY,JSON.stringify(undatedOrder))}catch(_){}
+    }
     if(calMeta.icalUrl1!==undefined)try{if(calMeta.icalUrl1)localStorage.setItem(ICAL_URL_KEY,calMeta.icalUrl1);else localStorage.removeItem(ICAL_URL_KEY)}catch(_){}
     if(calMeta.icalUrl2!==undefined)try{if(calMeta.icalUrl2)localStorage.setItem(ICAL_URL_2_KEY,calMeta.icalUrl2);else localStorage.removeItem(ICAL_URL_2_KEY)}catch(_){}
   }
@@ -2605,7 +2704,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 setInterval(pollCloud,5000);window.addEventListener('focus',()=>{syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);refreshCalendarEvents(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);refreshCalendarEvents(false)}}});initCloud();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v108')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v109')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
