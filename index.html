@@ -1111,6 +1111,7 @@ function taskFingerprint(list){return JSON.stringify((list||[]).map(t=>[t.id,t.t
 const LIST_ICON_PRESETS=['📋','🏢','🏫','🏡','📖','🎬','🚗','🎁','🛒','📚','📙','📝','💼','💻','⭐','🎯','💪','🏃','✈️','🍽️','☕','🎵','🎨','📷','💰','🌱','🐾','🏥','🎓','❤️'];
 function getListIcon(lst){
   if(lst&&listIcons&&listIcons[lst.id])return listIcons[lst.id];
+  if(lst&&lst.id==='__all__')return '🗂️';
   const t=String(lst?.title||'');
   if(/업무|회사|일|프로젝트|직장/.test(t))return '🏢';
   if(/개인|가정|집|반복|장기/.test(t))return '🏡';
@@ -1150,20 +1151,26 @@ function listsView(){
   const displayLists=getOrderedTaskLists();
   const tasksForList=(lst)=>tasks.filter(t=>t.googleListId===lst.id||(lst.isDefault&&!t.googleListId));
   if(activeListId){
-    const curList=displayLists.find(l=>l.id===activeListId);
+    const curList=activeListId==='__all__'
+      ?{id:'__all__',title:'전체목록',isAll:true}
+      :displayLists.find(l=>l.id===activeListId);
     if(curList){
-      const all=tasksForList(curList);
+      const all=curList.isAll?tasks:tasksForList(curList);
       const open=sortWithUndatedOrder(all.filter(t=>!t.done));
       const done=all.filter(t=>t.done);
-      const listIdForForm=curList.id==='__default__'?'':curList.id;
+      const listIdForForm=(curList.id==='__default__'||curList.isAll)?'':curList.id;
       const curIcon=getListIcon(curList);
-      return '<section class="view lists-view '+(view==='lists'?'active':'')+'"><button type="button" class="list-back-btn" data-list-back>← 전체 목록</button><div class="heading"><div><p class="eyebrow">Google Tasks 목록</p><h1><button type="button" class="list-folder-ico" data-pick-list-icon="'+esc(curList.id)+'" data-pick-list-title="'+esc(curList.title)+'" title="아이콘 변경" style="border:0;margin-right:2px">'+curIcon+'</button>'+esc(curList.title)+'</h1><p class="sub">아이콘을 눌러 원하는 모양으로 바꿀 수 있어요.</p></div><div class="score"><b>'+open.length+'개</b><br>할 일</div></div>'+composer('',listIdForForm)+'<div class="bar" style="margin:8px 2px 8px"><span>할 일 <small>'+open.length+'개</small></span>'+renderSortBtn()+'</div><div class="list undated-sortable-list">'+(open.length?open.map(t=>row(t,{showDate:true})).join(''):empty('이 목록에 할 일이 없어요.'))+'</div><div class="done-bar"><span>완료된 할 일 <small>'+done.length+'개</small></span><button type="button" class="toggle-done-btn" data-toggle-done>'+(hideCompletedTasks?'완료 목록 보기':'완료 목록 숨기기')+'</button></div>'+(hideCompletedTasks?'':'<div class="list">'+(done.length?done.map(t=>row(t,{showDate:true})).join(''):empty('완료된 할 일이 없어요.'))+'</div>')+'</section>';
+      const eyebrowTxt=curList.isAll?'모든 할 일':'Google Tasks 목록';
+      return '<section class="view lists-view '+(view==='lists'?'active':'')+'"><button type="button" class="list-back-btn" data-list-back>← 전체 목록</button><div class="heading"><div><p class="eyebrow">'+eyebrowTxt+'</p><h1><button type="button" class="list-folder-ico" data-pick-list-icon="'+esc(curList.id)+'" data-pick-list-title="'+esc(curList.title)+'" title="아이콘 변경" style="border:0;margin-right:2px">'+curIcon+'</button>'+esc(curList.title)+'</h1><p class="sub">아이콘을 눌러 원하는 모양으로 바꿀 수 있어요.</p></div><div class="score"><b>'+open.length+'개</b><br>할 일</div></div>'+composer('',listIdForForm)+'<div class="bar" style="margin:8px 2px 8px"><span>할 일 <small>'+open.length+'개</small></span>'+renderSortBtn()+'</div><div class="list undated-sortable-list">'+(open.length?open.map(t=>row(t,{showDate:true})).join(''):empty('이 목록에 할 일이 없어요.'))+'</div><div class="done-bar"><span>완료된 할 일 <small>'+done.length+'개</small></span><button type="button" class="toggle-done-btn" data-toggle-done>'+(hideCompletedTasks?'완료 목록 보기':'완료 목록 숨기기')+'</button></div>'+(hideCompletedTasks?'':'<div class="list">'+(done.length?done.map(t=>row(t,{showDate:true})).join(''):empty('완료된 할 일이 없어요.'))+'</div>')+'</section>';
     }
     activeListId=null;
   }
   const canReorder=displayLists.length>1;
   const reordering=canReorder&&listReorderMode;
-  const cardsHtml=displayLists.map((lst,idx)=>{
+  const allOpenCnt=tasks.filter(t=>!t.done).length;
+  const allIco=getListIcon({id:'__all__',title:'전체목록'});
+  const allCardHtml=reordering?'':'<div class="list-folder-card" data-open-list="__all__" role="button" tabindex="0"><div class="list-folder-left"><button type="button" class="list-folder-ico" data-pick-list-icon="__all__" data-pick-list-title="전체목록" title="아이콘 변경" style="border:0">'+allIco+'</button><span class="list-folder-name">전체목록</span></div><div class="list-folder-right"><span>'+allOpenCnt+'개</span><span>›</span></div></div>';
+  const cardsHtml=allCardHtml+displayLists.map((lst,idx)=>{
     const openCnt=tasksForList(lst).filter(t=>!t.done).length;
     const ico=getListIcon(lst);
     if(reordering){
@@ -2791,7 +2798,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 setInterval(pollCloud,5000);window.addEventListener('focus',()=>{syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);refreshCalendarEvents(false)}});document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncCurrentDayIfChanged();if(!isUserTyping()){pollCloud(true);if(googleAccessToken)syncGoogleTasks(false);refreshCalendarEvents(false)}}});initCloud();refreshCalendarEvents(false);setInterval(()=>refreshCalendarEvents(false),5*60*1000);
 })();
 if('serviceWorker' in navigator){
-  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v110')caches.delete(k)}))}}catch(_){}
+  try{if(window.caches){caches.keys().then(keys=>keys.forEach(k=>{if(k!=='haru-mobile-v111')caches.delete(k)}))}}catch(_){}
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js').then(reg=>{
       reg.update();
